@@ -1,0 +1,198 @@
+// Armory Intelligence - Database Schema
+// AI-Powered Firearms Education Platform
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// ============================================
+// FIREARMS DATABASE
+// ============================================
+
+model Firearm {
+  id             String   @id @default(cuid())
+  name           String
+  manufacturer   String
+  type           String   // handgun, rifle, shotgun
+  action         String   // semi-auto, bolt, pump, lever, revolver
+  caliber        String
+  capacity       Int
+  weight         Float    // in pounds
+  barrelLength   Float    // in inches
+  overallLength  Float?   // in inches
+  price          Float?
+  imageUrl       String?
+  model3dUrl     String?
+  country        String?
+  yearIntroduced Int?
+  description    String?
+  specifications String?  // JSON string for additional specs
+  history        String?
+  safetyFeatures String?  // JSON string array
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  maintenanceGuides MaintenanceGuide[]
+  ballistics        BallisticsData[]
+
+  @@index([type])
+  @@index([caliber])
+  @@index([manufacturer])
+}
+
+// ============================================
+// MAINTENANCE & GUIDES
+// ============================================
+
+model MaintenanceGuide {
+  id          String   @id @default(cuid())
+  firearmId   String?
+  firearmType String?  // generic guides for firearm types
+  title       String
+  description String?
+  steps       String   // JSON array of step objects
+  difficulty  String   // beginner, intermediate, advanced
+  timeMinutes Int
+  videoUrl    String?
+  tools       String   // JSON array of required tools
+  warnings    String?  // JSON array of safety warnings
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  firearm Firearm? @relation(fields: [firearmId], references: [id])
+
+  @@index([firearmType])
+  @@index([difficulty])
+}
+
+// ============================================
+// BALLISTICS DATA
+// ============================================
+
+model BallisticsData {
+  id              String @id @default(cuid())
+  firearmId       String?
+  caliber         String
+  bulletWeight    Int    // in grains
+  muzzleVelocity  Int    // fps
+  muzzleEnergy    Int    // ft-lbs
+  bc              Float  // ballistic coefficient
+  trajectoryData  String // JSON array of distance/drop data
+  manufacturer    String?
+  bulletType      String? // FMJ, HP, SP, etc.
+
+  // Relations
+  firearm Firearm? @relation(fields: [firearmId], references: [id])
+
+  @@index([caliber])
+}
+
+// ============================================
+// LEGAL & REGULATIONS
+// ============================================
+
+model LegalRegulation {
+  id               String   @id @default(cuid())
+  state            String
+  stateCode        String   // TX, CA, FL, etc.
+  category         String   // purchase, carry, storage, transport
+  title            String
+  content          String   // Main regulation text
+  requirements     String   // JSON array of requirements
+  restrictions     String?  // JSON array of restrictions
+  penalties        String?  // JSON array of penalties
+  exemptions       String?  // JSON array of exemptions
+  effectiveDate    DateTime?
+  sourceUrl        String?
+  lastVerified     DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([state, category])
+  @@index([stateCode])
+  @@index([category])
+}
+
+model CCWReciprocity {
+  id              String @id @default(cuid())
+  homeState       String
+  homeStateCode   String
+  honoredStates   String // JSON array of state codes that honor this permit
+  restrictedIn    String? // JSON array of states with restrictions
+  notes           String?
+  updatedAt       DateTime @updatedAt
+
+  @@unique([homeStateCode])
+}
+
+// ============================================
+// SAFETY & EDUCATION
+// ============================================
+
+model SafetyChecklist {
+  id          String   @id @default(cuid())
+  category    String   // storage, handling, cleaning, transport, range
+  title       String
+  description String?
+  items       String   // JSON array of checklist items
+  priority    String   // critical, high, medium, low
+  audience    String?  // beginner, all, children-present
+  createdAt   DateTime @default(now())
+
+  @@index([category])
+}
+
+model Quiz {
+  id           String   @id @default(cuid())
+  title        String
+  description  String?
+  category     String   // safety, maintenance, legal, identification
+  difficulty   String   // beginner, intermediate, advanced
+  questions    String   // JSON array of question objects
+  passingScore Int      @default(70)
+  timeLimit    Int?     // minutes
+  createdAt    DateTime @default(now())
+
+  @@index([category])
+  @@index([difficulty])
+}
+
+// ============================================
+// USER PROGRESS
+// ============================================
+
+model UserProgress {
+  id               String   @id @default(cuid())
+  oderId          String   @unique // external user ID
+  completedQuizzes String   @default("[]") // JSON array of quiz IDs with scores
+  badges           String   @default("[]") // JSON array of earned badges
+  certifications   String   @default("[]") // JSON array of certifications
+  savedFirearms    String   @default("[]") // JSON array of saved firearm IDs
+  preferences      String   @default("{}") // JSON object of user preferences
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+// ============================================
+// HISTORICAL DATA
+// ============================================
+
+model HistoricalEra {
+  id          String   @id @default(cuid())
+  name        String
+  startYear   Int
+  endYear     Int
+  description String
+  keyEvents   String   // JSON array of events
+  innovations String   // JSON array of innovations
+  imageUrl    String?
+  order       Int      @default(0)
+
+  @@index([startYear])
+}

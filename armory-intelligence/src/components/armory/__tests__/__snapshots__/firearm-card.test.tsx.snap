@@ -1,0 +1,178 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`FirearmCard Component matches snapshot for consistent rendering 1`] = `
+<div
+  animate="[object Object]"
+  class="w-full max-w-md bg-slate-900 border rounded-xl overflow-hidden shadow-xl cursor-pointer transition-all duration-200 border-slate-700 hover:border-slate-500"
+  initial="[object Object]"
+  transition="[object Object]"
+>
+  <div
+    class="relative h-48 bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center"
+  >
+    <div
+      class="text-6xl opacity-30"
+    >
+      🔫
+    </div>
+    <div
+      class="absolute top-3 left-3 px-3 py-1 bg-slate-800/80 backdrop-blur-sm rounded-full text-xs font-medium text-slate-300 uppercase tracking-wider"
+    >
+      Handgun
+    </div>
+    <div
+      class="absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-medium border bg-slate-500/20 text-slate-400 border-slate-500/30"
+    >
+      Semi-Automatic
+    </div>
+  </div>
+  <div
+    class="p-5"
+  >
+    <div
+      class="mb-4"
+    >
+      <p
+        class="text-sm text-orange-400 font-medium"
+      >
+        Glock
+      </p>
+      <h3
+        class="text-xl font-bold text-white"
+      >
+        Glock 19
+      </h3>
+      <p
+        class="text-sm text-slate-400 mt-1 line-clamp-2"
+      >
+        Compact and reliable striker-fired pistol
+      </p>
+    </div>
+    <div
+      class="grid grid-cols-2 gap-3 mb-4"
+    >
+      <div
+        class="bg-slate-800/50 rounded-lg p-3"
+      >
+        <div
+          class="flex items-center gap-2 mb-1"
+        >
+          <span
+            class="text-slate-500"
+          >
+            ◎
+          </span>
+          <span
+            class="text-xs text-slate-500 uppercase tracking-wider"
+          >
+            Caliber
+          </span>
+        </div>
+        <p
+          class="text-white font-semibold"
+        >
+          9mm
+        </p>
+      </div>
+      <div
+        class="bg-slate-800/50 rounded-lg p-3"
+      >
+        <div
+          class="flex items-center gap-2 mb-1"
+        >
+          <span
+            class="text-slate-500"
+          >
+            ▣
+          </span>
+          <span
+            class="text-xs text-slate-500 uppercase tracking-wider"
+          >
+            Capacity
+          </span>
+        </div>
+        <p
+          class="text-white font-semibold"
+        >
+          15 rds
+        </p>
+      </div>
+      <div
+        class="bg-slate-800/50 rounded-lg p-3"
+      >
+        <div
+          class="flex items-center gap-2 mb-1"
+        >
+          <span
+            class="text-slate-500"
+          >
+            ⚖
+          </span>
+          <span
+            class="text-xs text-slate-500 uppercase tracking-wider"
+          >
+            Weight
+          </span>
+        </div>
+        <p
+          class="text-white font-semibold"
+        >
+          23.65 lbs
+        </p>
+      </div>
+      <div
+        class="bg-slate-800/50 rounded-lg p-3"
+      >
+        <div
+          class="flex items-center gap-2 mb-1"
+        >
+          <span
+            class="text-slate-500"
+          >
+            ↔
+          </span>
+          <span
+            class="text-xs text-slate-500 uppercase tracking-wider"
+          >
+            Barrel
+          </span>
+        </div>
+        <p
+          class="text-white font-semibold"
+        >
+          4.02"
+        </p>
+      </div>
+    </div>
+    <div
+      class="flex items-center justify-between pt-4 border-t border-slate-700"
+    >
+      <span
+        class="text-sm text-slate-400"
+      >
+        MSRP
+      </span>
+      <span
+        class="text-2xl font-bold text-orange-400"
+      >
+        $
+        599.99
+      </span>
+    </div>
+    <div
+      class="flex gap-2 mt-4 pt-4 border-t border-slate-700"
+    >
+      <button
+        class="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors bg-slate-700 text-slate-300 hover:bg-slate-600"
+      >
+        📊 Compare
+      </button>
+      <button
+        class="flex-1 px-3 py-2 rounded-lg text-sm font-medium bg-slate-700 text-slate-300 hover:bg-slate-600 transition-colors"
+      >
+        ▼ More Details
+      </button>
+    </div>
+  </div>
+</div>
+`;
