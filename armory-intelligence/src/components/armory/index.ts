@@ -10,7 +10,7 @@ export type { FirearmCardProps } from "./firearm-card";
 export { SafetyWarning, safetyWarningSchema } from "./safety-warning";
 export type { SafetyWarningProps } from "./safety-warning";
 
-export { ComparisonTable, comparisonTablePropsSchema as comparisonTableSchema, comparisonTableStateSchema } from "./comparison-table";
+export { ComparisonTable, comparisonTablePropsSchema, comparisonTablePropsSchema as comparisonTableSchema, comparisonTableStateSchema } from "./comparison-table";
 export type { ComparisonTableProps } from "./comparison-table";
 
 export { InteractiveChecklist, interactiveChecklistSchema, interactiveChecklistPropsSchema, interactiveChecklistStateSchema } from "./interactive-checklist";

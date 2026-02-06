@@ -105,7 +105,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Parse JSON items field from database results
-    const parsedChecklists = checklists.map((checklist) => ({
+    const parsedChecklists = checklists.map((checklist: (typeof checklists)[number]) => ({
       ...checklist,
       items: typeof checklist.items === "string" 
         ? JSON.parse(checklist.items) 

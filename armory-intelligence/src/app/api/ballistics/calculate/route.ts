@@ -8,62 +8,84 @@ import { z } from "zod";
 
 // Validation schema
 const BallisticsRequestSchema = z.object({
-  firearmId: z.string(),
-  distance: z.number().min(0).max(1000),
+  firearmId: z.string().optional(),
+  bulletWeight: z.number().min(1).max(1000).optional(),
+  muzzleVelocity: z.number().min(100).max(5000).optional(),
+  ballisticCoefficient: z.number().min(0.01).max(1.0).optional(),
+  distance: z.number().min(0).max(2000),
   windSpeed: z.number().default(0),
   windDirection: z.enum(["0", "45", "90", "135", "180", "225", "270", "315"]).optional(),
-  temperature: z.number().default(59), // Fahrenheit
+  temperature: z.number().default(59),
   humidity: z.number().min(0).max(100).default(50),
   barometricPressure: z.number().default(29.92),
 });
 
 type BallisticsRequest = z.infer<typeof BallisticsRequestSchema>;
 
-// Simplified ballistic calculator
+/**
+ * Enhanced ballistic calculator using simplified drag model
+ * Accounts for bullet weight, muzzle velocity, BC, and environmental factors
+ */
 function calculateBallistics(params: BallisticsRequest) {
-  const { distance, windSpeed, temperature, humidity, barometricPressure } = params;
+  const { 
+    distance, windSpeed, temperature, humidity, barometricPressure,
+    bulletWeight: bw, muzzleVelocity: mv, ballisticCoefficient: bc
+  } = params;
 
-  // Base trajectory (simplified for demo)
-  const muzzleVelocity = 900; // feet per second
-  const gravity = 32.174; // ft/s²
-  const g = gravity * 12; // convert to in/s²
+  const bulletWeight = bw ?? 147;      // grains
+  const muzzleVelocity = mv ?? 900;    // fps
+  const ballisticCoeff = bc ?? 0.168;   // G1 BC
 
-  // Time of flight
-  const timeOfFlight = (distance * 12) / (muzzleVelocity * 12);
+  const gravity = 386.09; // in/s²
 
-  // Drop calculation (vertical distance fallen)
-  const dropInches = 0.5 * g * Math.pow(timeOfFlight, 2) / 12;
+  // Air density correction factor
+  const stdTemp = 59; // °F
+  const stdPressure = 29.92; // inHg
+  const tempFactor = (stdTemp + 459.67) / (temperature + 459.67);
+  const pressureFactor = barometricPressure / stdPressure;
+  const humidityFactor = 1 - (humidity * 0.0002);
+  const airDensityRatio = pressureFactor * tempFactor * humidityFactor;
 
-  // Wind drift (simplified)
-  const windDriftInches = windSpeed > 0 ? (windSpeed * timeOfFlight) / 10 : 0;
+  // Adjusted BC for air density
+  const adjBC = ballisticCoeff / airDensityRatio;
 
-  // Velocity at distance (simplified velocity loss)
-  const velocityRetention = Math.max(0.5, 1 - distance / 1000);
-  const velocityAtDistance = muzzleVelocity * velocityRetention;
+  // Calculate velocity at distance using Siacci method (simplified)
+  const retardCoeff = 1 / (adjBC * 1000);
+  const velocityAtDist = muzzleVelocity / (1 + retardCoeff * distance);
 
-  // Energy (kinetic energy in foot-pounds)
-  const bulletWeight = 147; // grains (9mm typical)
-  const bulletMass = bulletWeight / 7000; // convert to pounds
-  const energyAtMuzzle = (bulletMass * Math.pow(muzzleVelocity, 2)) / (2 * 32.174);
-  const energyAtDistance = (bulletMass * Math.pow(velocityAtDistance, 2)) / (2 * 32.174);
+  // Time of flight (average velocity method)
+  const avgVelocity = (muzzleVelocity + velocityAtDist) / 2;
+  const distanceFeet = distance * 3; // yards to feet
+  const timeOfFlight = distanceFeet / avgVelocity;
 
-  // Environmental corrections
-  const temperatureCorrection = (temperature - 59) * 0.01; // 1% per 10°F
-  const humidityCorrection = (humidity - 50) * 0.001; // small effect
-  const pressureCorrection = (barometricPressure - 29.92) * 0.05;
+  // Bullet drop
+  const dropInches = 0.5 * gravity * Math.pow(timeOfFlight, 2);
 
-  const totalCorrection = temperatureCorrection + humidityCorrection + pressureCorrection;
-  const correctedDrop = dropInches * (1 + totalCorrection);
+  // Wind drift calculation
+  const windAngle = 90; // degrees, crosswind
+  const windComponent = windSpeed * Math.sin((windAngle * Math.PI) / 180);
+  const lagTime = timeOfFlight - (distanceFeet / muzzleVelocity);
+  const windDriftInches = windComponent * lagTime * 17.6; // 17.6 in/s per mph
+
+  // Kinetic energy (ft-lbs)
+  const energyAtMuzzle = (bulletWeight * Math.pow(muzzleVelocity, 2)) / 450240;
+  const energyAtDistance = (bulletWeight * Math.pow(velocityAtDist, 2)) / 450240;
+
+  // Velocity retention percentage
+  const velocityRetention = (velocityAtDist / muzzleVelocity) * 100;
 
   return {
     distance,
-    dropInches: Math.round(correctedDrop * 100) / 100,
-    windDriftInches: Math.round(windDriftInches * 100) / 100,
+    dropInches: Math.round(dropInches * 100) / 100,
+    windDriftInches: Math.round(Math.abs(windDriftInches) * 100) / 100,
     timeOfFlight: Math.round(timeOfFlight * 1000) / 1000,
-    velocityAtDistance: Math.round(velocityAtDistance),
+    velocityAtDistance: Math.round(velocityAtDist),
     energyAtMuzzle: Math.round(energyAtMuzzle),
     energyAtDistance: Math.round(energyAtDistance),
-    velocityRetention: Math.round(velocityRetention * 100),
+    velocityRetention: Math.round(velocityRetention),
+    bulletWeight,
+    muzzleVelocity,
+    ballisticCoefficient: ballisticCoeff,
   };
 }
 

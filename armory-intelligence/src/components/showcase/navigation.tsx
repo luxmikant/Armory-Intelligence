@@ -32,9 +32,9 @@ export function Navigation() {
   return (
     <>
       <motion.header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
-            ? "bg-slate-900/80 backdrop-blur-xl border-b border-slate-800"
+            ? "bg-slate-950/80 backdrop-blur-xl border-b border-white/[0.06] shadow-xl shadow-black/20"
             : "bg-transparent"
         }`}
         initial={{ y: -100 }}
@@ -44,22 +44,22 @@ export function Navigation() {
         <div className="container mx-auto px-6">
           <nav className="flex items-center justify-between h-16 md:h-20">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
-                <span className="text-xl">🔫</span>
+            <Link href="/" className="flex items-center gap-3 group">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-lg shadow-orange-500/20 group-hover:shadow-orange-500/40 transition-shadow">
+                <span className="text-lg font-black text-slate-950">AI</span>
               </div>
-              <span className="font-bold text-white text-lg hidden sm:block">
+              <span className="font-bold text-white text-lg hidden sm:block group-hover:text-orange-300 transition-colors">
                 Armory Intelligence
               </span>
             </Link>
 
             {/* Desktop Nav */}
-            <div className="hidden md:flex items-center gap-8">
+            <div className="hidden md:flex items-center gap-1">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="text-slate-400 hover:text-white transition-colors text-sm font-medium"
+                  className="text-slate-400 hover:text-white transition-colors text-sm font-medium px-4 py-2 rounded-lg hover:bg-white/[0.05]"
                 >
                   {link.label}
                 </Link>
@@ -70,9 +70,12 @@ export function Navigation() {
             <div className="flex items-center gap-4">
               <Link
                 href="/chat"
-                className="hidden sm:inline-flex px-5 py-2 bg-orange-500 text-slate-900 font-semibold rounded-full text-sm hover:bg-orange-400 transition-colors"
+                className="hidden sm:inline-flex px-5 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 text-slate-950 font-bold rounded-xl text-sm hover:shadow-[0_0_30px_rgba(251,146,60,0.3)] transition-all duration-300 items-center gap-2"
               >
-                Start Chat
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                AI Chat
               </Link>
 
               {/* Mobile menu button */}

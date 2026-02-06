@@ -10,8 +10,10 @@ import { motion } from "framer-motion";
 import { BallisticsChart } from "@/components/armory/ballistics-chart";
 import { EmbeddedChat } from "@/components/tambo/embedded-chat";
 import { PageContextHelper } from "@/components/tambo/page-context-helper";
+import { PageHeader } from "@/components/armory/page-header";
 import { TamboProvider } from "@tambo-ai/react";
 import { components, tools } from "@/lib/tambo";
+import { ClientOnly } from "@/components/client-only";
 import { 
   Target, 
   Wind, 
@@ -223,33 +225,18 @@ export default function BallisticsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <a href="/" className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
-                  <span className="text-xl">🔫</span>
-                </div>
-                <span className="font-bold text-white text-xl">Armory Intelligence</span>
-              </a>
-              <span className="text-slate-600 text-xl font-light">/</span>
-              <span className="text-purple-400 font-medium">Ballistics</span>
-            </div>
-
-            <nav className="flex items-center gap-6">
-              <a href="/catalog" className="text-slate-400 hover:text-white transition-colors">Catalog</a>
-              <a href="/safety" className="text-slate-400 hover:text-white transition-colors">Safety</a>
-              <a href="/regulations" className="text-slate-400 hover:text-white transition-colors">Regulations</a>
-              <a href="/chat" className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors">
-                AI Assistant
-              </a>
-            </nav>
-          </div>
-        </div>
-      </header>
+    <ClientOnly>
+      <TamboProvider
+        apiKey={process.env.NEXT_PUBLIC_TAMBO_API_KEY!}
+        components={components}
+        tools={tools}
+      >
+        <PageContextHelper 
+          contextKey="ballisticsPage"
+          context={pageContext}
+        />
+        <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+          <PageHeader pageName="Ballistics" accentColor="text-purple-400" />
 
       <div className="container mx-auto px-6 py-12">
         {/* Hero Section */}
@@ -548,23 +535,15 @@ export default function BallisticsPage() {
         </div>
       </div>
 
-      {/* Embedded AI Chat with Context Helpers */}
-      <TamboProvider
-        apiKey={process.env.NEXT_PUBLIC_TAMBO_API_KEY!}
-        components={components}
-        tools={tools}
-      >
-        <PageContextHelper 
-          contextKey="ballisticsPage"
-          context={pageContext}
-        />
-        <EmbeddedChat
-          pageName="ballistics"
-          suggestions={ballisticsSuggestions}
-          pageContext={pageContext}
-          title="Ballistics Assistant"
-        />
+      {/* Embedded AI Chat */}
+      <EmbeddedChat
+        pageName="ballistics"
+        suggestions={ballisticsSuggestions}
+        pageContext={pageContext}
+        title="Ballistics Assistant"
+      />
+        </div>
       </TamboProvider>
-    </div>
+    </ClientOnly>
   );
 }

@@ -26,15 +26,26 @@ export async function GET(request: NextRequest) {
     const offset = searchParams.get("offset")
       ? Number(searchParams.get("offset"))
       : 0;
+    const search = searchParams.get("search") || "";
 
     // Build where clause
     const where: any = {};
 
-    if (types.length > 0) {
+    // Text search across name, manufacturer, caliber, description
+    if (search) {
+      where.OR = [
+        { name: { contains: search } },
+        { manufacturer: { contains: search } },
+        { caliber: { contains: search } },
+        { description: { contains: search } },
+      ];
+    }
+
+    if (types.length > 0 && types[0] !== "") {
       where.type = { in: types };
     }
 
-    if (calibers.length > 0) {
+    if (calibers.length > 0 && calibers[0] !== "") {
       where.caliber = { in: calibers };
     }
 
@@ -75,10 +86,13 @@ export async function GET(request: NextRequest) {
         name: true,
         manufacturer: true,
         type: true,
+        action: true,
         caliber: true,
         capacity: true,
         weight: true,
+        barrelLength: true,
         price: true,
+        imageUrl: true,
         safetyFeatures: true,
         description: true,
         createdAt: true,

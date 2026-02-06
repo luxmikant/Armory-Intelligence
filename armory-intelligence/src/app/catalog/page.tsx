@@ -11,8 +11,10 @@ import { FirearmCard } from "@/components/armory/firearm-card";
 import { FilterPanel } from "@/components/armory/filter-panel";
 import { EmbeddedChat } from "@/components/tambo/embedded-chat";
 import { PageContextHelper } from "@/components/tambo/page-context-helper";
+import { PageHeader } from "@/components/armory/page-header";
 import { TamboProvider } from "@tambo-ai/react";
 import { components, tools } from "@/lib/tambo";
+import { ClientOnly } from "@/components/client-only";
 import { Search, Grid3X3, List, Loader2 } from "lucide-react";
 
 interface Firearm {
@@ -117,35 +119,20 @@ export default function CatalogPage() {
   ], []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <a href="/" className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
-                  <span className="text-xl">🔫</span>
-                </div>
-                <span className="font-bold text-white text-xl">Armory Intelligence</span>
-              </a>
-              <span className="text-slate-600 text-xl font-light">/</span>
-              <span className="text-orange-400 font-medium">Catalog</span>
-            </div>
+    <ClientOnly>
+      <TamboProvider
+        apiKey={process.env.NEXT_PUBLIC_TAMBO_API_KEY!}
+        components={components}
+        tools={tools}
+      >
+        <PageContextHelper 
+          contextKey="catalogPage"
+          context={pageContext}
+        />
+        <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+          <PageHeader pageName="Catalog" accentColor="text-orange-400" />
 
-            <nav className="flex items-center gap-6">
-              <a href="/safety" className="text-slate-400 hover:text-white transition-colors">Safety</a>
-              <a href="/ballistics" className="text-slate-400 hover:text-white transition-colors">Ballistics</a>
-              <a href="/regulations" className="text-slate-400 hover:text-white transition-colors">Regulations</a>
-              <a href="/chat" className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors">
-                AI Assistant
-              </a>
-            </nav>
-          </div>
-        </div>
-      </header>
-
-      <div className="container mx-auto px-6 py-8">
+          <div className="container mx-auto px-6 py-8">
         {/* Page Title and Search */}
         <div className="mb-8">
           <motion.h1 
@@ -305,23 +292,15 @@ export default function CatalogPage() {
         </div>
       </div>
 
-      {/* Embedded AI Chat with Context Helpers */}
-      <TamboProvider
-        apiKey={process.env.NEXT_PUBLIC_TAMBO_API_KEY!}
-        components={components}
-        tools={tools}
-      >
-        <PageContextHelper 
-          contextKey="catalogPage"
-          context={pageContext}
-        />
-        <EmbeddedChat
-          pageName="catalog"
-          suggestions={catalogSuggestions}
-          pageContext={pageContext}
-          title="Catalog Assistant"
-        />
+      {/* Embedded AI Chat */}
+      <EmbeddedChat
+        pageName="catalog"
+        suggestions={catalogSuggestions}
+        pageContext={pageContext}
+        title="Catalog Assistant"
+      />
+        </div>
       </TamboProvider>
-    </div>
+    </ClientOnly>
   );
 }
