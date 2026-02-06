@@ -4,10 +4,73 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
 
 // Skip static generation for this dynamic route
 export const dynamic = 'force-dynamic';
+
+// Mock state regulations
+const MOCK_REGULATIONS: Record<string, any> = {
+  CA: {
+    state: "CA",
+    permitRequired: true,
+    permitType: "Carry License (May-Issue)",
+    openCarry: "prohibited",
+    concealedCarry: "may-issue",
+    waitingPeriod: 10,
+    backgroundCheck: true,
+    registrationRequired: true,
+    assaultWeaponBan: true,
+    magazineCapacityLimit: 10,
+    redFlagLaw: true,
+    reciprocalStates: [],
+    disclaimer: "California has some of the strictest firearm regulations in the US",
+  },
+  TX: {
+    state: "TX",
+    permitRequired: true,
+    permitType: "License to Carry",
+    openCarry: "allowed",
+    concealedCarry: "shall-issue",
+    waitingPeriod: 0,
+    backgroundCheck: true,
+    registrationRequired: false,
+    assaultWeaponBan: false,
+    magazineCapacityLimit: null,
+    redFlagLaw: false,
+    reciprocalStates: ["AK", "AZ", "AR", "CO", "DE", "FL", "GA", "ID", "IN", "IA", "KS", "KY", "LA", "ME", "MS", "MO", "MT", "NE", "NV", "NH", "NM", "NC", "ND", "OH", "OK", "PA", "SC", "SD", "TN", "UT", "VT", "VA", "WA", "WV", "WI", "WY"],
+    disclaimer: "Texas has shall-issue concealed carry licensing",
+  },
+  FL: {
+    state: "FL",
+    permitRequired: true,
+    permitType: "License to Carry",
+    openCarry: "restricted",
+    concealedCarry: "shall-issue",
+    waitingPeriod: 3,
+    backgroundCheck: true,
+    registrationRequired: false,
+    assaultWeaponBan: false,
+    magazineCapacityLimit: null,
+    redFlagLaw: true,
+    reciprocalStates: ["Most states"],
+    disclaimer: "Florida recognizes concealed carry permits and has reciprocity with many states",
+  },
+  NY: {
+    state: "NY",
+    permitRequired: true,
+    permitType: "Carry License (May-Issue)",
+    openCarry: "prohibited",
+    concealedCarry: "may-issue",
+    waitingPeriod: 0,
+    backgroundCheck: true,
+    registrationRequired: true,
+    assaultWeaponBan: true,
+    magazineCapacityLimit: 10,
+    redFlagLaw: true,
+    reciprocalStates: [],
+    disclaimer: "New York has strict gun regulations, particularly in NYC",
+  },
+};
 
 export async function GET(
   request: NextRequest,
@@ -26,37 +89,33 @@ export async function GET(
       );
     }
 
-    // Fetch regulations for the state
-    const regulations = await prisma.legalRegulation.findMany({
-      where: {
-        state: stateCode,
-      },
-    });
+    const regulations = MOCK_REGULATIONS[stateCode];
 
-    // Fetch CCW reciprocity info if applicable
-    const ccwInfo = await prisma.cCWReciprocity.findFirst({
-      where: {
-        homeStateCode: stateCode,
-      },
-    });
-
-    if (regulations.length === 0 && !ccwInfo) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: `No regulations found for state: ${stateCode}`,
+    if (!regulations) {
+      // Return generic regulation for unmapped states
+      return NextResponse.json({
+        success: true,
+        data: {
+          state: stateCode,
+          permitRequired: true,
+          permitType: "Check state website",
+          openCarry: "Check state website",
+          concealedCarry: "Check state website",
+          waitingPeriod: null,
+          backgroundCheck: true,
+          registrationRequired: null,
+          assaultWeaponBan: null,
+          magazineCapacityLimit: null,
+          redFlagLaw: null,
+          reciprocalStates: [],
+          disclaimer: "Regulations not fully documented. Please verify with your state's official resources.",
         },
-        { status: 404 }
-      );
+      });
     }
 
     return NextResponse.json({
       success: true,
-      data: {
-        state: stateCode,
-        regulations,
-        ccwReciprocity: ccwInfo || null,
-      },
+      data: regulations,
     });
   } catch (error) {
     console.error("Error fetching regulations:", error);
@@ -68,4 +127,5 @@ export async function GET(
       { status: 500 }
     );
   }
+}
 }
