@@ -35,7 +35,17 @@ import Link from "next/link";
 // ============================================
 // WEAPON CARD COMPONENT
 // ============================================
-function WeaponCard({ weapon, onCompare }: { weapon: WeaponSeed; onCompare?: () => void }) {
+function WeaponCard({ 
+  weapon, 
+  onCompare, 
+  selected, 
+  onSelect 
+}: { 
+  weapon: WeaponSeed; 
+  onCompare?: () => void;
+  selected?: boolean;
+  onSelect?: (weapon: WeaponSeed) => void;
+}) {
   const isSciFi = weapon.universe === "star-wars";
   const accentColor = isSciFi ? "cyan" : "orange";
   
@@ -49,9 +59,13 @@ function WeaponCard({ weapon, onCompare }: { weapon: WeaponSeed; onCompare?: () 
       className={`
         group relative bg-[#181a24] rounded-xl border overflow-hidden
         transition-all duration-300 hover:scale-[1.02]
-        ${isSciFi 
-          ? "border-cyan-400/15 hover:border-cyan-400/30 hover:shadow-[0_0_30px_rgba(34,211,238,0.1)]" 
-          : "border-orange-500/15 hover:border-orange-500/30 hover:shadow-[0_0_30px_rgba(249,115,22,0.1)]"
+        ${selected 
+          ? isSciFi
+            ? "border-cyan-400/50 shadow-[0_0_30px_rgba(34,211,238,0.2)]"
+            : "border-orange-500/50 shadow-[0_0_30px_rgba(249,115,22,0.2)]"
+          : isSciFi 
+            ? "border-cyan-400/15 hover:border-cyan-400/30 hover:shadow-[0_0_30px_rgba(34,211,238,0.1)]" 
+            : "border-orange-500/15 hover:border-orange-500/30 hover:shadow-[0_0_30px_rgba(249,115,22,0.1)]"
         }
       `}
     >
@@ -59,6 +73,28 @@ function WeaponCard({ weapon, onCompare }: { weapon: WeaponSeed; onCompare?: () 
       <div className={`absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent ${
         isSciFi ? "via-cyan-400/40" : "via-orange-500/40"
       } to-transparent`} />
+
+      {/* Select checkbox */}
+      {onSelect && (
+        <div className="absolute top-3 left-3 z-10">
+          <button
+            onClick={() => onSelect(weapon)}
+            className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${
+              selected
+                ? isSciFi
+                  ? "bg-cyan-400 border-cyan-400"
+                  : "bg-orange-500 border-orange-500"
+                : "bg-black/50 border-white/20 hover:border-white/40 backdrop-blur-sm"
+            }`}
+          >
+            {selected && (
+              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+              </svg>
+            )}
+          </button>
+        </div>
+      )}
 
       {/* Weapon Image */}
       {weapon.imageUrl && (
@@ -135,16 +171,18 @@ function WeaponCard({ weapon, onCompare }: { weapon: WeaponSeed; onCompare?: () 
             <span>•</span>
             <span>{weapon.weight_kg}kg</span>
           </div>
-          {weapon._equivalentKey && (
-            <button
-              onClick={onCompare}
-              className={`text-xs font-medium transition-colors ${
-                isSciFi ? "text-cyan-400 hover:text-cyan-300" : "text-orange-400 hover:text-orange-300"
-              }`}
-            >
-              Compare →
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            {weapon._equivalentKey && (
+              <button
+                onClick={onCompare}
+                className={`text-xs font-medium transition-colors ${
+                  isSciFi ? "text-cyan-400 hover:text-cyan-300" : "text-orange-400 hover:text-orange-300"
+                }`}
+              >
+                Details →
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </motion.div>
@@ -289,7 +327,8 @@ export default function CatalogPage() {
   
   const [searchQuery, setSearchQuery] = useState("");
   const [universeFilter, setUniverseFilter] = useState<"all" | "star-wars" | "real">("all");
-  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [categoryFilter, setCategoryFilter] = useState<s
+  const [selectedWeapons, setSelectedWeapons] = useState<WeaponSeed[]>([]);tring>("all");
   const [view, setView] = useState<"grid" | "comparisons">("grid");
   const [showFilters, setShowFilters] = useState(false);
 
@@ -321,8 +360,23 @@ export default function CatalogPage() {
   }, [allWeapons, searchQuery, universeFilter, categoryFilter]);
 
   // Group by universe for display
-  const sciFiWeapons = filteredWeapons.filter(w => w.universe === "star-wars");
-  const realWeapons = filteredWeapons.filter(w => w.universe === "real");
+  conHandle weapon selection for comparison
+  const handleSelectWeapon = (weapon: WeaponSeed) => {
+    setSelectedWeapons(prev => {
+      const isSelected = prev.some(w => w.name === weapon.name);
+      if (isSelected) {
+        return prev.filter(w => w.name !== weapon.name);
+      } else {
+        // Limit to 4 weapons for comparison
+        if (prev.length >= 4) {
+          return prev;
+        }
+        return [...prev, weapon];
+      }
+    });
+  };
+
+  const clearSelection = () => setSelectedWeapons([]);
 
   // Page context for AI
   const pageContext = useMemo(() => ({
@@ -330,6 +384,10 @@ export default function CatalogPage() {
     totalWeapons: allWeapons.length,
     displayedWeapons: filteredWeapons.length,
     sciFiCount: sciFiWeapons.length,
+    realCount: realWeapons.length,
+    activeFilters: { universe: universeFilter, category: categoryFilter, search: searchQuery },
+    selectedWeapons: selectedWeapons.map(w => w.name),
+  }), [allWeapons.length, filteredWeapons.length, sciFiWeapons.length, realWeapons.length, universeFilter, categoryFilter, searchQuery, selectedWeapons
     realCount: realWeapons.length,
     activeFilters: { universe: universeFilter, category: categoryFilter, search: searchQuery },
   }), [allWeapons.length, filteredWeapons.length, sciFiWeapons.length, realWeapons.length, universeFilter, categoryFilter, searchQuery]);
@@ -523,6 +581,11 @@ export default function CatalogPage() {
                   <span className={universeFilter === "star-wars" ? "text-cyan-400" : "text-orange-400"}>
                     {" "}({universeFilter === "star-wars" ? "Sci-Fi" : "Real World"})
                   </span>
+                      key={weapon.name} 
+                      weapon={weapon}
+                      selected={selectedWeapons.some(w => w.name === weapon.name)}
+                      onSelect={handleSelectWeapon}
+                   
                 )}
               </p>
               <div className="flex items-center gap-4 text-sm">
@@ -555,7 +618,85 @@ export default function CatalogPage() {
                     real={pair.real} 
                   />
                 ))}
-              </div>
+              Comparison Panel */}
+          <AnimatePresence>
+            {selectedWeapons.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 100 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 100 }}
+                className="fixed bottom-6 left-6 right-6 md:left-auto md:right-24 md:w-96 z-50"
+              >
+                <div className="bg-[#12141c] rounded-2xl border border-orange-500/30 shadow-2xl shadow-orange-500/10 overflow-hidden">
+                  {/* Header */}
+                  <div className="px-5 py-4 bg-gradient-to-r from-orange-500/10 to-cyan-400/10 border-b border-white/[0.06]">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-white font-bold flex items-center gap-2">
+                        <Crosshair className="w-4 h-4" />
+                        Selected for Comparison
+                      </h3>
+                      <button
+                        onClick={clearSelection}
+                        className="text-slate-400 hover:text-white transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <p className="text-xs text-slate-500">
+                      {selectedWeapons.length} of 4 weapons selected
+                    </p>
+                  </div>
+
+                  {/* Selected weapons list */}
+                  <div className="p-4 max-h-64 overflow-y-auto space-y-2">
+                    {selectedWeapons.map((weapon) => {
+                      const isSciFi = weapon.universe === "star-wars";
+                      return (
+                        <div
+                          key={weapon.name}
+                          className={`flex items-center gap-3 p-3 rounded-lg border ${
+                            isSciFi
+                              ? "bg-cyan-400/5 border-cyan-400/20"
+                              : "bg-orange-500/5 border-orange-500/20"
+                          }`}
+                        >
+                          <div className={`w-2 h-2 rounded-full ${isSciFi ? "bg-cyan-400" : "bg-orange-500"}`} />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-white text-sm font-medium truncate">{weapon.name}</p>
+                            <p className="text-slate-500 text-xs">{weapon.category}</p>
+                          </div>
+                          <button
+                            onClick={() => handleSelectWeapon(weapon)}
+                            className="text-slate-400 hover:text-white transition-colors"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="p-4 border-t border-white/[0.06] space-y-2">
+                    <Link
+                      href={`/chat?compare=${selectedWeapons.map(w => encodeURIComponent(w.name)).join(',')}`}
+                      className="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-orange-500/20 transition-all"
+                    >
+                      <MessageSquare className="w-4 h-4" />
+                      AI Comparison Analysis
+                    </Link>
+                    {selectedWeapons.length >= 2 && (
+                      <p className="text-center text-xs text-slate-500">
+                        Compare {selectedWeapons.length} weapons with AI insights
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* </div>
             )}
 
             {/* Empty state */}
