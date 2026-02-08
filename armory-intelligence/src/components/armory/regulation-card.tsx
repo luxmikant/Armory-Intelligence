@@ -8,22 +8,23 @@
 import { motion } from "framer-motion";
 import { z } from "zod";
 
+// Using .catch() instead of .default() to handle null values from streaming
 export const regulationCardSchema = z.object({
-  state: z.string().default("Unknown").describe("State name or two-letter code"),
-  stateCode: z.string().default("XX").describe("Two-letter state code"),
-  permitRequired: z.boolean().default(false).describe("Whether a permit is required for purchase"),
-  permitType: z.string().optional().describe("Type of permit if required"),
-  openCarry: z.enum(["allowed", "restricted", "prohibited"]).default("restricted").describe("Open carry status"),
-  concealedCarry: z.enum(["shall-issue", "may-issue", "no-issue", "unrestricted"]).default("may-issue").describe("Concealed carry policy"),
-  waitingPeriod: z.number().optional().describe("Waiting period in days, if any"),
-  backgroundCheck: z.boolean().default(true).describe("Whether background check is required"),
-  registrationRequired: z.boolean().default(false).describe("Whether firearm registration is required"),
-  assaultWeaponBan: z.boolean().default(false).describe("Whether assault weapons are banned"),
-  magazineCapacityLimit: z.number().optional().describe("Maximum magazine capacity, if limited"),
-  redFlagLaw: z.boolean().default(false).describe("Whether red flag laws are in effect"),
-  reciprocalStates: z.array(z.string()).optional().describe("States with CCW reciprocity"),
-  lastUpdated: z.string().optional().describe("Date regulations were last updated"),
-  disclaimer: z.string().optional().describe("Legal disclaimer text"),
+  state: z.string().catch("Unknown").describe("State name or two-letter code"),
+  stateCode: z.string().catch("XX").describe("Two-letter state code"),
+  permitRequired: z.boolean().catch(false).describe("Whether a permit is required for purchase"),
+  permitType: z.string().nullish().describe("Type of permit if required"),
+  openCarry: z.enum(["allowed", "restricted", "prohibited"]).catch("restricted").describe("Open carry status"),
+  concealedCarry: z.enum(["shall-issue", "may-issue", "no-issue", "unrestricted"]).catch("may-issue").describe("Concealed carry policy"),
+  waitingPeriod: z.number().nullish().describe("Waiting period in days, if any"),
+  backgroundCheck: z.boolean().catch(true).describe("Whether background check is required"),
+  registrationRequired: z.boolean().catch(false).describe("Whether firearm registration is required"),
+  assaultWeaponBan: z.boolean().catch(false).describe("Whether assault weapons are banned"),
+  magazineCapacityLimit: z.number().nullish().describe("Maximum magazine capacity, if limited"),
+  redFlagLaw: z.boolean().catch(false).describe("Whether red flag laws are in effect"),
+  reciprocalStates: z.array(z.string()).catch([]).describe("States with CCW reciprocity"),
+  lastUpdated: z.string().nullish().describe("Date regulations were last updated"),
+  disclaimer: z.string().nullish().describe("Legal disclaimer text"),
 });
 
 export type RegulationCardProps = z.infer<typeof regulationCardSchema>;
@@ -144,11 +145,11 @@ export function RegulationCard({
                 {registrationRequired ? "✓ Required" : "○ Not Required"}
               </span>
             </div>
-            {waitingPeriod !== undefined && (
+            {waitingPeriod != null && (
               <div className="flex items-center justify-between py-2 border-b border-slate-800">
                 <span className="text-slate-300">Waiting Period</span>
-                <span className={waitingPeriod > 0 ? "text-orange-400" : "text-slate-500"}>
-                  {waitingPeriod > 0 ? `${waitingPeriod} days` : "None"}
+                <span className={(waitingPeriod ?? 0) > 0 ? "text-orange-400" : "text-slate-500"}>
+                  {(waitingPeriod ?? 0) > 0 ? `${waitingPeriod} days` : "None"}
                 </span>
               </div>
             )}

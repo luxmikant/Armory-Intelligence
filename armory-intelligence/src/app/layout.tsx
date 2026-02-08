@@ -13,10 +13,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Armory Intelligence — AI-Powered Firearms Education",
+  title: "Arsenal Nexus — Star Wars × Modern Military AI Platform",
   description:
-    "AI-Powered Firearms Education Platform built with Tambo Generative UI. Interactive catalog, safety guides, ballistics calculator, and state regulations — all powered by AI that builds the interface.",
-  keywords: ["firearms", "education", "AI", "Tambo", "generative UI", "safety", "ballistics"],
+    "Where the Galaxy Far, Far Away meets modern military engineering. Compare Star Wars blasters to real-world firearms, explore tactical briefings, and experience AI-powered weapon analysis through Tambo Generative UI.",
+  keywords: ["Star Wars", "weapons", "blasters", "firearms", "AI", "Tambo", "generative UI", "comparison", "Arsenal Nexus"],
 };
 
 export default function RootLayout({

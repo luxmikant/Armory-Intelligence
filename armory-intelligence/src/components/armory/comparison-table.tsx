@@ -18,32 +18,35 @@ import { motion } from "framer-motion";
 import { withInteractable, useTamboComponentState } from "@tambo-ai/react";
 
 // Single firearm schema for comparison
+// Using .catch() instead of .default() to handle null values from streaming
 const firearmCompareSchema = z.object({
-  id: z.string().default("").describe("Unique identifier"),
-  name: z.string().default("Unknown").describe("Firearm name/model"),
-  manufacturer: z.string().default("Unknown").describe("Manufacturer name"),
-  type: z.string().default("handgun").describe("Type of firearm"),
-  caliber: z.string().default("9mm").describe("Caliber"),
-  capacity: z.number().default(0).describe("Magazine capacity"),
-  weight: z.number().default(0).describe("Weight in lbs"),
-  barrelLength: z.number().default(0).describe("Barrel length in inches"),
-  price: z.number().optional().describe("Price in USD"),
-  imageUrl: z.string().optional().describe("Image URL"),
+  id: z.string().catch("").describe("Unique identifier"),
+  name: z.string().catch("Unknown").describe("Firearm name/model"),
+  manufacturer: z.string().catch("Unknown").describe("Manufacturer name"),
+  type: z.string().catch("handgun").describe("Type of firearm"),
+  caliber: z.string().catch("9mm").describe("Caliber"),
+  capacity: z.number().catch(0).describe("Magazine capacity"),
+  weight: z.number().catch(0).describe("Weight in lbs"),
+  barrelLength: z.number().catch(0).describe("Barrel length in inches"),
+  price: z.number().nullish().describe("Price in USD"),
+  imageUrl: z.string().nullish().describe("Image URL"),
 });
 
 // Schema for Tambo AI component registration (props schema)
+// Using .catch() instead of .default() to handle null values from streaming
 export const comparisonTablePropsSchema = z.object({
-  firearms: z.array(firearmCompareSchema).max(4).default([]).describe("Array of 2-4 firearms to compare"),
-  highlightDifferences: z.boolean().optional().default(true).describe("Whether to highlight spec differences"),
-  showRecommendation: z.boolean().optional().default(false).describe("Whether to show AI recommendation"),
-  recommendation: z.string().optional().describe("AI recommendation text if showRecommendation is true"),
+  firearms: z.array(firearmCompareSchema).max(4).catch([]).describe("Array of 2-4 firearms to compare"),
+  highlightDifferences: z.boolean().catch(true).describe("Whether to highlight spec differences"),
+  showRecommendation: z.boolean().catch(false).describe("Whether to show AI recommendation"),
+  recommendation: z.string().nullish().describe("AI recommendation text if showRecommendation is true"),
 });
 
 // State schema for interactable tracking
+// Using .catch() instead of .default() to handle null values from streaming
 export const comparisonTableStateSchema = z.object({
-  selectedFirearmId: z.string().nullable().default(null).describe("ID of the firearm user is focusing on"),
-  removedFirearmIds: z.array(z.string()).default([]).describe("IDs of firearms user has removed from comparison"),
-  preferredSpec: z.string().nullable().default(null).describe("The spec the user cares most about (e.g., 'price', 'capacity')"),
+  selectedFirearmId: z.string().nullable().catch(null).describe("ID of the firearm user is focusing on"),
+  removedFirearmIds: z.array(z.string()).catch([]).describe("IDs of firearms user has removed from comparison"),
+  preferredSpec: z.string().nullable().catch(null).describe("The spec the user cares most about (e.g., 'price', 'capacity')"),
 });
 
 export type ComparisonTableProps = z.infer<typeof comparisonTablePropsSchema>;

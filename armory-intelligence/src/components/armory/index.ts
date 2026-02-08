@@ -27,3 +27,13 @@ export type { RegulationCardProps } from "./regulation-card";
 
 export { StepGuide, stepGuideSchema } from "./step-guide";
 export type { StepGuideProps } from "./step-guide";
+
+// Arsenal Nexus - Star Wars × Modern Military Components
+export { HologramCard, hologramCardPropsSchema, hologramCardSchema, hologramCardStateSchema } from "./hologram-card";
+export type { HologramCardProps } from "./hologram-card";
+
+export { WeaponShowdown, weaponShowdownPropsSchema, weaponShowdownSchema, weaponShowdownStateSchema } from "./weapon-showdown";
+export type { WeaponShowdownProps } from "./weapon-showdown";
+
+export { TacticalBriefing, tacticalBriefingPropsSchema, tacticalBriefingSchema, tacticalBriefingStateSchema } from "./tactical-briefing";
+export type { TacticalBriefingProps } from "./tactical-briefing";

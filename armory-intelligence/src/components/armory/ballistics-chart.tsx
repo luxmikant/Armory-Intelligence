@@ -30,34 +30,37 @@ import {
 } from "recharts";
 
 // Trajectory data point schema
+// Using .catch() instead of .default() to handle null values from streaming
 const trajectoryPointSchema = z.object({
-  distance: z.number().default(0).describe("Distance in yards"),
-  drop: z.number().default(0).describe("Bullet drop in inches"),
-  velocity: z.number().default(0).describe("Velocity in fps"),
-  energy: z.number().default(0).describe("Energy in ft-lbs"),
-  windDrift: z.number().optional().describe("Wind drift in inches"),
+  distance: z.number().catch(0).describe("Distance in yards"),
+  drop: z.number().catch(0).describe("Bullet drop in inches"),
+  velocity: z.number().catch(0).describe("Velocity in fps"),
+  energy: z.number().catch(0).describe("Energy in ft-lbs"),
+  windDrift: z.number().nullish().describe("Wind drift in inches"),
 });
 
 // Schema for Tambo AI component registration (props)
+// Using .catch() instead of .default() to handle null values from streaming
 export const ballisticsChartPropsSchema = z.object({
-  caliber: z.string().default("9mm").describe("Caliber being displayed (e.g., '.308 Winchester')"),
-  bulletWeight: z.number().default(115).describe("Bullet weight in grains"),
-  muzzleVelocity: z.number().default(1200).describe("Muzzle velocity in fps"),
-  trajectoryData: z.array(trajectoryPointSchema).default([]).describe("Array of trajectory data points"),
-  zeroDistance: z.number().optional().default(100).describe("Zero distance in yards"),
-  showVelocity: z.boolean().optional().default(true).describe("Show velocity line"),
-  showEnergy: z.boolean().optional().default(true).describe("Show energy line"),
+  caliber: z.string().catch("9mm").describe("Caliber being displayed (e.g., '.308 Winchester')"),
+  bulletWeight: z.number().catch(115).describe("Bullet weight in grains"),
+  muzzleVelocity: z.number().catch(1200).describe("Muzzle velocity in fps"),
+  trajectoryData: z.array(trajectoryPointSchema).catch([]).describe("Array of trajectory data points"),
+  zeroDistance: z.number().catch(100).describe("Zero distance in yards"),
+  showVelocity: z.boolean().catch(true).describe("Show velocity line"),
+  showEnergy: z.boolean().catch(true).describe("Show energy line"),
   comparisonData: z.object({
     caliber: z.string(),
     trajectoryData: z.array(trajectoryPointSchema),
-  }).optional().describe("Optional comparison caliber data"),
+  }).nullish().describe("Optional comparison caliber data"),
 });
 
 // State schema for interactable tracking
+// Using .catch() instead of .default() to handle null values from streaming
 export const ballisticsChartStateSchema = z.object({
-  selectedDistance: z.number().nullable().default(null).describe("The distance in yards the user is currently examining"),
-  focusedMetric: z.enum(["drop", "velocity", "energy", "windDrift"]).nullable().default(null).describe("Which metric the user is most interested in"),
-  isTableExpanded: z.boolean().default(false).describe("Whether the data table is expanded for detailed viewing"),
+  selectedDistance: z.number().nullable().catch(null).describe("The distance in yards the user is currently examining"),
+  focusedMetric: z.enum(["drop", "velocity", "energy", "windDrift"]).nullable().catch(null).describe("Which metric the user is most interested in"),
+  isTableExpanded: z.boolean().catch(false).describe("Whether the data table is expanded for detailed viewing"),
 });
 
 // Keep alias for backward compatibility
@@ -303,7 +306,7 @@ function BallisticsChartBase({
                   <td className="px-3 py-2 text-right text-orange-400">{point.drop.toFixed(1)}"</td>
                   <td className="px-3 py-2 text-right text-blue-400">{point.velocity} fps</td>
                   <td className="px-3 py-2 text-right text-green-400">{point.energy} ft-lbs</td>
-                  {point.windDrift !== undefined && (
+                  {point.windDrift != null && (
                     <td className="px-3 py-2 text-right text-purple-400">{point.windDrift.toFixed(1)}"</td>
                   )}
                 </tr>

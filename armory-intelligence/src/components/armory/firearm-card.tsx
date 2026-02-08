@@ -18,19 +18,20 @@ import { motion } from "framer-motion";
 import { withInteractable, useTamboComponentState } from "@tambo-ai/react";
 
 // Schema for Tambo AI component registration
+// Using .catch() instead of .default() to handle null values from streaming
 export const firearmCardSchema = z.object({
-  name: z.string().default("Unknown Firearm").describe("The name/model of the firearm"),
-  manufacturer: z.string().default("Unknown").describe("The manufacturer/brand name"),
-  type: z.enum(["handgun", "rifle", "shotgun"]).default("handgun").describe("The type of firearm"),
-  action: z.string().default("semi-auto").describe("The action type (semi-auto, bolt, pump, lever, revolver)"),
-  caliber: z.string().default("9mm").describe("The caliber/gauge of the firearm"),
-  capacity: z.number().default(0).describe("Magazine/chamber capacity"),
-  weight: z.number().default(0).describe("Weight in pounds"),
-  barrelLength: z.number().default(0).describe("Barrel length in inches"),
-  price: z.number().optional().describe("MSRP price in USD"),
-  imageUrl: z.string().optional().describe("URL to firearm image"),
-  description: z.string().optional().describe("Brief description of the firearm"),
-  safetyFeatures: z.array(z.string()).optional().describe("List of safety features"),
+  name: z.string().catch("Unknown Firearm").describe("The name/model of the firearm"),
+  manufacturer: z.string().catch("Unknown").describe("The manufacturer/brand name"),
+  type: z.enum(["handgun", "rifle", "shotgun"]).catch("handgun").describe("The type of firearm"),
+  action: z.string().catch("semi-auto").describe("The action type (semi-auto, bolt, pump, lever, revolver)"),
+  caliber: z.string().catch("9mm").describe("The caliber/gauge of the firearm"),
+  capacity: z.number().catch(0).describe("Magazine/chamber capacity"),
+  weight: z.number().catch(0).describe("Weight in pounds"),
+  barrelLength: z.number().catch(0).describe("Barrel length in inches"),
+  price: z.number().nullish().describe("MSRP price in USD"),
+  imageUrl: z.string().nullish().describe("URL to firearm image"),
+  description: z.string().nullish().describe("Brief description of the firearm"),
+  safetyFeatures: z.array(z.string()).catch([]).describe("List of safety features"),
 });
 
 // State schema for interactable tracking

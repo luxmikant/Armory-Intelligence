@@ -12,12 +12,13 @@ import { z } from "zod";
 import { motion } from "framer-motion";
 
 // Schema for Tambo AI component registration
+// Using .catch() instead of .default() to handle null values from streaming
 export const safetyWarningSchema = z.object({
-  level: z.enum(["critical", "warning", "caution", "info"]).default("info").describe("Severity level of the warning"),
-  title: z.string().default("Safety Notice").describe("Short title for the warning"),
-  message: z.string().default("").describe("Detailed warning message"),
-  actions: z.array(z.string()).optional().describe("Recommended actions to take"),
-  dismissible: z.boolean().optional().default(false).describe("Whether the warning can be dismissed"),
+  level: z.enum(["critical", "warning", "caution", "info"]).catch("info").describe("Severity level of the warning"),
+  title: z.string().catch("Safety Notice").describe("Short title for the warning"),
+  message: z.string().catch("").describe("Detailed warning message"),
+  actions: z.array(z.string()).catch([]).describe("Recommended actions to take"),
+  dismissible: z.boolean().catch(false).describe("Whether the warning can be dismissed"),
 });
 
 export type SafetyWarningProps = z.infer<typeof safetyWarningSchema>;

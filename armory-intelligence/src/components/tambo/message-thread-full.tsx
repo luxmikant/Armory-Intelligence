@@ -70,27 +70,27 @@ export const MessageThreadFull = React.forwardRef<
   const defaultSuggestions: Suggestion[] = [
     {
       id: "suggestion-1",
-      title: "Compare firearms",
-      detailedSuggestion: "Compare the Glock 19 and Sig P320 for concealed carry",
-      messageId: "compare-query",
+      title: "⚡ E-11 vs M4A1 Showdown",
+      detailedSuggestion: "Compare the E-11 Blaster Rifle from Star Wars to the M4A1 Carbine. Show me a weapon showdown!",
+      messageId: "showdown-query",
     },
     {
       id: "suggestion-2",
-      title: "Safety checklist",
-      detailedSuggestion: "Show me the essential firearm storage safety checklist",
-      messageId: "safety-query",
+      title: "🌌 Show Star Wars Weapons",
+      detailedSuggestion: "Show me all the Star Wars weapons in the Arsenal Nexus database as hologram cards",
+      messageId: "star-wars-query",
     },
     {
       id: "suggestion-3",
-      title: "State regulations",
-      detailedSuggestion: "What are the concealed carry laws in Texas?",
-      messageId: "regulations-query",
+      title: "◆ DL-44 vs .44 Magnum",
+      detailedSuggestion: "Compare Han Solo's DL-44 Heavy Blaster to the .44 Magnum revolver. Who wins in a showdown?",
+      messageId: "dl44-query",
     },
     {
       id: "suggestion-4",
-      title: "Ballistics data",
-      detailedSuggestion: "Calculate ballistics for a 9mm at 100 yards",
-      messageId: "ballistics-query",
+      title: "📋 Tactical Briefing",
+      detailedSuggestion: "Create a tactical mission briefing for defending a rebel base. Include weapon recommendations from both Star Wars and real-world arsenals.",
+      messageId: "briefing-query",
     },
   ];
 

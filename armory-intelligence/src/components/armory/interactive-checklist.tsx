@@ -18,28 +18,31 @@ import { motion, AnimatePresence } from "framer-motion";
 import { withInteractable, useTamboComponentState } from "@tambo-ai/react";
 
 // Checklist item schema
+// Using .catch() instead of .default() to handle null values from streaming
 const checklistItemSchema = z.object({
-  id: z.string().default("").describe("Unique item identifier"),
-  text: z.string().default("").describe("The checklist item text"),
-  priority: z.enum(["critical", "high", "medium", "low"]).optional().describe("Priority level"),
-  note: z.string().optional().describe("Additional note or tip"),
+  id: z.string().catch("").describe("Unique item identifier"),
+  text: z.string().catch("").describe("The checklist item text"),
+  priority: z.enum(["critical", "high", "medium", "low"]).nullish().describe("Priority level"),
+  note: z.string().nullish().describe("Additional note or tip"),
 });
 
 // Schema for Tambo AI component registration (props)
+// Using .catch() instead of .default() to handle null values from streaming
 export const interactiveChecklistPropsSchema = z.object({
-  title: z.string().default("Checklist").describe("Title of the checklist"),
-  description: z.string().optional().describe("Description or context"),
-  category: z.enum(["safety", "storage", "cleaning", "transport", "range", "purchase"]).default("safety").describe("Checklist category"),
-  items: z.array(checklistItemSchema).default([]).describe("Array of checklist items"),
-  allowSkip: z.boolean().optional().default(false).describe("Whether items can be skipped"),
-  showProgress: z.boolean().optional().default(true).describe("Whether to show progress bar"),
+  title: z.string().catch("Checklist").describe("Title of the checklist"),
+  description: z.string().nullish().describe("Description or context"),
+  category: z.enum(["safety", "storage", "cleaning", "transport", "range", "purchase"]).catch("safety").describe("Checklist category"),
+  items: z.array(checklistItemSchema).catch([]).describe("Array of checklist items"),
+  allowSkip: z.boolean().catch(false).describe("Whether items can be skipped"),
+  showProgress: z.boolean().catch(true).describe("Whether to show progress bar"),
 });
 
 // State schema for interactable tracking
+// Using .catch() instead of .default() to handle null values from streaming
 export const interactiveChecklistStateSchema = z.object({
-  checkedItemIds: z.array(z.string()).default([]).describe("IDs of items that have been checked off"),
-  expandedItemId: z.string().nullable().default(null).describe("ID of the item currently expanded to show its note"),
-  completedAt: z.string().nullable().default(null).describe("ISO timestamp when checklist was fully completed"),
+  checkedItemIds: z.array(z.string()).catch([]).describe("IDs of items that have been checked off"),
+  expandedItemId: z.string().nullable().catch(null).describe("ID of the item currently expanded to show its note"),
+  completedAt: z.string().nullable().catch(null).describe("ISO timestamp when checklist was fully completed"),
 });
 
 // Keep alias for backward compatibility

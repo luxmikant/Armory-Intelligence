@@ -33,13 +33,14 @@ export const filterPanelPropsSchema = z.object({
 });
 
 // State schema for interactable tracking
+// Using .catch() instead of .default() to handle null values from streaming
 export const filterPanelStateSchema = z.object({
-  selectedTypes: z.array(z.string()).default([]).describe("Firearm types user has selected (e.g., Handgun, Rifle)"),
-  selectedCalibers: z.array(z.string()).default([]).describe("Calibers user has selected (e.g., 9mm, .45 ACP)"),
-  priceMin: z.number().default(0).describe("Minimum price the user is looking for"),
-  priceMax: z.number().default(5000).describe("Maximum price the user is willing to pay"),
-  sortBy: z.string().default("relevance").describe("How user wants results sorted (relevance, price-low, price-high, name, newest, popularity)"),
-  isExpanded: z.boolean().default(false).describe("Whether the filter panel is currently open"),
+  selectedTypes: z.array(z.string()).catch([]).describe("Firearm types user has selected (e.g., Handgun, Rifle)"),
+  selectedCalibers: z.array(z.string()).catch([]).describe("Calibers user has selected (e.g., 9mm, .45 ACP)"),
+  priceMin: z.number().catch(0).describe("Minimum price the user is looking for"),
+  priceMax: z.number().catch(5000).describe("Maximum price the user is willing to pay"),
+  sortBy: z.string().catch("relevance").describe("How user wants results sorted (relevance, price-low, price-high, name, newest, popularity)"),
+  isExpanded: z.boolean().catch(false).describe("Whether the filter panel is currently open"),
 });
 
 // Keep alias for backward compatibility

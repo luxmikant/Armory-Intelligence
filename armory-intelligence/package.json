@@ -20,6 +20,7 @@
     "@radix-ui/react-popover": "^1.1.15",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
+    "@supabase/supabase-js": "^2.95.3",
     "@tailwindcss/oxide": "^4.1.17",
     "@tambo-ai/react": "^0.70.0",
     "@tambo-ai/typescript-sdk": "^0.84.0",

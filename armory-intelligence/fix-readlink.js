@@ -8,6 +8,7 @@
  */
 const fs = require('fs');
 
+// Patch readlinkSync
 const originalReadlinkSync = fs.readlinkSync;
 fs.readlinkSync = function patchedReadlinkSync(path, options) {
   try {
@@ -26,6 +27,7 @@ fs.readlinkSync = function patchedReadlinkSync(path, options) {
   }
 };
 
+// Patch async readlink
 const originalReadlink = fs.readlink;
 fs.readlink = function patchedReadlink(path, options, callback) {
   if (typeof options === 'function') {
@@ -45,7 +47,7 @@ fs.readlink = function patchedReadlink(path, options, callback) {
   });
 };
 
-// Also patch promises API if available
+// Patch promises API
 if (fs.promises) {
   const originalReadlinkPromise = fs.promises.readlink;
   fs.promises.readlink = async function patchedReadlinkPromise(path, options) {
@@ -64,3 +66,25 @@ if (fs.promises) {
     }
   };
 }
+
+// Also patch lstat to handle directories properly
+const originalLstatSync = fs.lstatSync;
+fs.lstatSync = function patchedLstatSync(path, options) {
+  try {
+    const stats = originalLstatSync.call(fs, path, options);
+    return stats;
+  } catch (err) {
+    throw err;
+  }
+};
+
+// Suppress EISDIR during directory operations
+process.on('uncaughtException', (err) => {
+  if (err.code === 'EISDIR' && err.syscall === 'readlink') {
+    console.warn(`[fix-readlink] Suppressed EISDIR for: ${err.path}`);
+    return;
+  }
+  throw err;
+});
+
+console.log('[fix-readlink] Applied exFAT EISDIR patches');

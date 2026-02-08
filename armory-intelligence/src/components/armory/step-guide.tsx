@@ -9,26 +9,28 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { z } from "zod";
 
+// Using .catch() instead of .default() to handle null values from streaming
 const stepSchema = z.object({
-  id: z.string().default("").describe("Unique step identifier"),
-  title: z.string().default("").describe("Step title"),
-  description: z.string().default("").describe("Detailed step instructions"),
-  imageUrl: z.string().optional().describe("Optional image URL for the step"),
-  tips: z.array(z.string()).optional().describe("Helpful tips for this step"),
-  warnings: z.array(z.string()).optional().describe("Safety warnings for this step"),
-  tools: z.array(z.string()).optional().describe("Tools needed for this step"),
-  duration: z.string().optional().describe("Estimated time for this step"),
+  id: z.string().catch("").describe("Unique step identifier"),
+  title: z.string().catch("").describe("Step title"),
+  description: z.string().catch("").describe("Detailed step instructions"),
+  imageUrl: z.string().nullish().describe("Optional image URL for the step"),
+  tips: z.array(z.string()).catch([]).describe("Helpful tips for this step"),
+  warnings: z.array(z.string()).catch([]).describe("Safety warnings for this step"),
+  tools: z.array(z.string()).catch([]).describe("Tools needed for this step"),
+  duration: z.string().nullish().describe("Estimated time for this step"),
 });
 
+// Using .catch() instead of .default() to handle null values from streaming
 export const stepGuideSchema = z.object({
-  title: z.string().default("Guide").describe("Guide title"),
-  description: z.string().default("").describe("Brief description of the procedure"),
-  category: z.enum(["cleaning", "maintenance", "assembly", "disassembly", "safety", "storage"]).default("maintenance").describe("Guide category"),
-  difficulty: z.enum(["beginner", "intermediate", "advanced"]).default("beginner").describe("Difficulty level"),
-  totalDuration: z.string().optional().describe("Estimated total time"),
-  toolsRequired: z.array(z.string()).optional().describe("List of required tools"),
-  steps: z.array(stepSchema).default([]).describe("Array of steps"),
-  safetyNotice: z.string().optional().describe("Safety notice shown at top"),
+  title: z.string().catch("Guide").describe("Guide title"),
+  description: z.string().catch("").describe("Brief description of the procedure"),
+  category: z.enum(["cleaning", "maintenance", "assembly", "disassembly", "safety", "storage"]).catch("maintenance").describe("Guide category"),
+  difficulty: z.enum(["beginner", "intermediate", "advanced"]).catch("beginner").describe("Difficulty level"),
+  totalDuration: z.string().nullish().describe("Estimated total time"),
+  toolsRequired: z.array(z.string()).catch([]).describe("List of required tools"),
+  steps: z.array(stepSchema).catch([]).describe("Array of steps"),
+  safetyNotice: z.string().nullish().describe("Safety notice shown at top"),
 });
 
 export type StepGuideProps = z.infer<typeof stepGuideSchema>;

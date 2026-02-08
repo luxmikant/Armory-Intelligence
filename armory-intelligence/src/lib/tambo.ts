@@ -2,7 +2,7 @@
  * @file tambo.ts
  * @description Central configuration file for Tambo components and tools
  * 
- * Armory Intelligence - AI-Powered Firearms Education Platform
+ * Arsenal Nexus - Star Wars × Modern Military AI-Powered Platform
  * This file registers all custom components and tools for the Tambo AI SDK.
  *
  * Read more about Tambo at https://tambo.co/docs
@@ -19,6 +19,12 @@ import {
   interactiveChecklistSchema,
   BallisticsChart,
   ballisticsChartSchema,
+  HologramCard,
+  hologramCardPropsSchema,
+  WeaponShowdown,
+  weaponShowdownPropsSchema,
+  TacticalBriefing,
+  tacticalBriefingPropsSchema,
 } from "@/components/armory";
 import { FilterPanel, filterPanelSchema } from "@/components/armory/filter-panel";
 import { RegulationCard, regulationCardSchema } from "@/components/armory/regulation-card";
@@ -29,6 +35,7 @@ import { DataCard, dataCardSchema } from "@/components/ui/card-data";
 import type { TamboComponent } from "@tambo-ai/react";
 import { TamboTool } from "@tambo-ai/react";
 import { z } from "zod";
+import { getWeapons, getComparisonData, getWeaponByName } from "@/lib/weapons-service";
 
 // ============================================
 // MOCK DATA SERVICE (Replace with actual API later)
@@ -251,6 +258,179 @@ export const tools: TamboTool[] = [
       })),
     }),
   },
+
+  // ============================================
+  // ARSENAL NEXUS TOOLS (Star Wars × Real)
+  // ============================================
+  {
+    name: "searchAllWeapons",
+    description: "Search the Arsenal Nexus weapons database. Includes both real-world and Star Wars weapons. Use for questions about weapons, blasters, firearms, lightsabers, etc.",
+    tool: async ({ universe, category, search, sortBy, limit }) => {
+      const weapons = await getWeapons({ universe, category, search, sortBy, sortOrder: "desc", limit: limit ?? 6 });
+      return weapons.map(w => ({
+        name: w.name,
+        universe: w.universe,
+        category: w.category,
+        manufacturer: w.manufacturer,
+        era: w.era,
+        description: w.description,
+        damageRating: w.damage_rating,
+        effectiveRange: w.effective_range_m,
+        weight: w.weight_kg,
+        rateOfFire: w.rate_of_fire,
+        tacticalScore: w.tactical_score,
+        coolnessFactor: w.coolness_factor,
+        communityRating: w.community_rating,
+        comparisonNotes: w.comparison_notes,
+        specialFeature: w.stun_setting ? "Stun setting" : w.kyber_crystal_type ? `${w.kyber_crystal_type} crystal` : undefined,
+      }));
+    },
+    inputSchema: z.object({
+      universe: z.enum(["real", "star-wars"]).optional().describe("Filter by universe: 'real' for modern weapons, 'star-wars' for sci-fi"),
+      category: z.enum(["rifle", "pistol", "heavy", "shotgun", "sniper", "explosive", "melee", "special", "carbine"]).optional().describe("Weapon category"),
+      search: z.string().optional().describe("Search by name"),
+      sortBy: z.enum(["damage_rating", "coolness_factor", "tactical_score", "community_rating"]).optional().describe("Sort by stat"),
+      limit: z.number().optional().describe("Max results (default 6)"),
+    }),
+    outputSchema: z.array(z.object({
+      name: z.string(),
+      universe: z.string(),
+      category: z.string(),
+      manufacturer: z.string(),
+      era: z.string(),
+      description: z.string(),
+      damageRating: z.number(),
+      effectiveRange: z.number(),
+      weight: z.number(),
+      rateOfFire: z.string(),
+      tacticalScore: z.number(),
+      coolnessFactor: z.number(),
+      communityRating: z.number(),
+      comparisonNotes: z.string().optional(),
+      specialFeature: z.string().optional(),
+    })),
+  },
+  {
+    name: "compareSciFiToReal",
+    description: "Compare a Star Wars weapon to its real-world equivalent. Use for 'compare E-11 to M4' or 'how does a blaster compare to a rifle' type questions. Generates a head-to-head showdown.",
+    tool: async ({ sciFiWeaponName }) => {
+      const comparisons = await getComparisonData(sciFiWeaponName);
+      if (comparisons.length === 0) {
+        return { error: "No comparison found. Try a Star Wars weapon name like 'E-11', 'DL-44', or 'Lightsaber'." };
+      }
+      const c = comparisons[0];
+      return {
+        sciFiWeapon: {
+          name: c.sciFi.name,
+          universe: "star-wars",
+          manufacturer: c.sciFi.manufacturer,
+          damage: c.sciFi.damage_rating,
+          range: c.sciFi.effective_range_m,
+          weight: c.sciFi.weight_kg,
+          rateOfFire: c.sciFi.rate_of_fire,
+          tacticalScore: c.sciFi.tactical_score,
+          coolness: c.sciFi.coolness_factor,
+          specialAbility: c.sciFi.stun_setting ? "Stun mode" : c.sciFi.kyber_crystal_type ? `${c.sciFi.kyber_crystal_type} crystal` : undefined,
+        },
+        realWeapon: {
+          name: c.real.name,
+          universe: "real",
+          manufacturer: c.real.manufacturer,
+          damage: c.real.damage_rating,
+          range: c.real.effective_range_m,
+          weight: c.real.weight_kg,
+          rateOfFire: c.real.rate_of_fire,
+          tacticalScore: c.real.tactical_score,
+          coolness: c.real.coolness_factor,
+          specialAbility: c.real.action_type ?? undefined,
+        },
+        rangeAnalysis: c.analysis.rangeAdvantage,
+        damageAnalysis: c.analysis.damageAdvantage,
+        physicsNote: c.analysis.physicsNote,
+        tacticalVerdict: c.analysis.tacticalVerdict,
+        funFact: c.analysis.funFact,
+      };
+    },
+    inputSchema: z.object({
+      sciFiWeaponName: z.string().describe("The Star Wars weapon name to compare (e.g. 'E-11', 'DL-44', 'Lightsaber', 'Bowcaster')"),
+    }),
+    outputSchema: z.object({
+      sciFiWeapon: z.object({
+        name: z.string(),
+        universe: z.string(),
+        manufacturer: z.string(),
+        damage: z.number(),
+        range: z.number(),
+        weight: z.number(),
+        rateOfFire: z.string(),
+        tacticalScore: z.number(),
+        coolness: z.number(),
+        specialAbility: z.string().optional(),
+      }),
+      realWeapon: z.object({
+        name: z.string(),
+        universe: z.string(),
+        manufacturer: z.string(),
+        damage: z.number(),
+        range: z.number(),
+        weight: z.number(),
+        rateOfFire: z.string(),
+        tacticalScore: z.number(),
+        coolness: z.number(),
+        specialAbility: z.string().optional(),
+      }),
+      rangeAnalysis: z.string(),
+      damageAnalysis: z.string(),
+      physicsNote: z.string(),
+      tacticalVerdict: z.string(),
+      funFact: z.string(),
+      error: z.string().optional(),
+    }),
+  },
+  {
+    name: "getMissionBriefing",
+    description: "Generate a tactical mission briefing that blends Star Wars scenarios with real military tactics. Use for 'create a mission', 'tactical scenario', 'battle plan' type requests.",
+    tool: async ({ scenarioType, weaponPreference }) => {
+      // Build a dynamic briefing from the weapons database
+      const allWeapons = await getWeapons({ limit: 19 });
+      const sciFiWeapons = allWeapons.filter(w => w.universe === "star-wars");
+      const realWeapons = allWeapons.filter(w => w.universe === "real");
+      
+      // Pick recommended weapons
+      const recs = [];
+      if (weaponPreference) {
+        const match = await getWeaponByName(weaponPreference);
+        if (match) recs.push({ name: match.name, universe: match.universe, reason: "User requested", rating: 4 });
+      }
+      // Add top sci-fi and real weapons
+      const topSciFi = sciFiWeapons.sort((a, b) => b.tactical_score - a.tactical_score).slice(0, 2);
+      const topReal = realWeapons.sort((a, b) => b.tactical_score - a.tactical_score).slice(0, 2);
+      for (const w of topSciFi) recs.push({ name: w.name, universe: w.universe, reason: `Top ${w.category} — tactical score ${w.tactical_score}`, rating: Math.ceil(w.tactical_score / 20) });
+      for (const w of topReal) recs.push({ name: w.name, universe: w.universe, reason: `Top ${w.category} — tactical score ${w.tactical_score}`, rating: Math.ceil(w.tactical_score / 20) });
+      
+      return {
+        weaponRecommendations: recs.slice(0, 4),
+        availableSciFiWeapons: sciFiWeapons.map(w => w.name),
+        availableRealWeapons: realWeapons.map(w => w.name),
+        scenarioType: scenarioType ?? "assault",
+      };
+    },
+    inputSchema: z.object({
+      scenarioType: z.enum(["assault", "defense", "recon", "extraction", "siege"]).optional().describe("Type of tactical scenario"),
+      weaponPreference: z.string().optional().describe("Preferred weapon name to include"),
+    }),
+    outputSchema: z.object({
+      weaponRecommendations: z.array(z.object({
+        name: z.string(),
+        universe: z.string(),
+        reason: z.string(),
+        rating: z.number(),
+      })),
+      availableSciFiWeapons: z.array(z.string()),
+      availableRealWeapons: z.array(z.string()),
+      scenarioType: z.string(),
+    }),
+  },
 ];
 
 // ============================================
@@ -317,6 +497,28 @@ export const components: TamboComponent[] = [
     description: "Step-by-step guide for maintenance, cleaning, and safety procedures with progress tracking.",
     component: StepGuide,
     propsSchema: stepGuideSchema,
+  },
+
+  // ============================================
+  // ARSENAL NEXUS COMPONENTS (Star Wars × Real)
+  // ============================================
+  {
+    name: "HologramCard",
+    description: "Display a weapon in holographic Star Wars style. Use for showing individual weapon details from either universe (real or Star Wars). Sci-fi weapons get a cyan holographic look, real weapons get amber military look. Best for showcasing single weapons.",
+    component: HologramCard,
+    propsSchema: hologramCardPropsSchema,
+  },
+  {
+    name: "WeaponShowdown",
+    description: "Epic head-to-head comparison between a Star Wars weapon and its real-world equivalent. Shows animated stat bars, physics analysis, fun facts, and lets users vote. Use when comparing a sci-fi weapon to a real one, like 'E-11 vs M4A1' or 'DL-44 vs .44 Magnum'. ALWAYS use the compareSciFiToReal tool first to get data.",
+    component: WeaponShowdown,
+    propsSchema: weaponShowdownPropsSchema,
+  },
+  {
+    name: "TacticalBriefing",
+    description: "Star Wars-style tactical mission briefing that blends sci-fi scenarios with real military tactics. Shows mission objectives, threat assessment, weapon recommendations, and historical parallels. Use when users ask for tactical scenarios, mission plans, or 'what if' battle scenarios.",
+    component: TacticalBriefing,
+    propsSchema: tacticalBriefingPropsSchema,
   },
 ];
 

@@ -288,6 +288,7 @@ export default function MaintenancePage() {
             level="warning"
             title="Before You Begin"
             message="Always ensure your firearm is completely unloaded before performing any maintenance. Remove all ammunition from your work area."
+            actions={["Clear chamber", "Remove magazine", "Check twice"]}
             dismissible={false}
           />
         </motion.div>
@@ -390,12 +391,14 @@ export default function MaintenancePage() {
             category="cleaning"
             difficulty={selectedGuide.difficulty === "Beginner" ? "beginner" : selectedGuide.difficulty === "Intermediate" ? "intermediate" : "advanced"}
             totalDuration={selectedGuide.duration}
+            toolsRequired={["Cleaning kit", "Bore brush", "Cleaning solvent"]}
             steps={selectedGuide.steps.map(step => ({
               id: String(step.id),
               title: step.title,
               description: step.description,
               tips: step.tips,
-              warnings: step.warning ? [step.warning] : undefined,
+              warnings: step.warning ? [step.warning] : [],
+              tools: [],
             }))}
           />
         </motion.div>
