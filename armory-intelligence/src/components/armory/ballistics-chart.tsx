@@ -31,19 +31,19 @@ import {
 
 // Trajectory data point schema
 const trajectoryPointSchema = z.object({
-  distance: z.number().describe("Distance in yards"),
-  drop: z.number().describe("Bullet drop in inches"),
-  velocity: z.number().describe("Velocity in fps"),
-  energy: z.number().describe("Energy in ft-lbs"),
+  distance: z.number().default(0).describe("Distance in yards"),
+  drop: z.number().default(0).describe("Bullet drop in inches"),
+  velocity: z.number().default(0).describe("Velocity in fps"),
+  energy: z.number().default(0).describe("Energy in ft-lbs"),
   windDrift: z.number().optional().describe("Wind drift in inches"),
 });
 
 // Schema for Tambo AI component registration (props)
 export const ballisticsChartPropsSchema = z.object({
-  caliber: z.string().describe("Caliber being displayed (e.g., '.308 Winchester')"),
-  bulletWeight: z.number().describe("Bullet weight in grains"),
-  muzzleVelocity: z.number().describe("Muzzle velocity in fps"),
-  trajectoryData: z.array(trajectoryPointSchema).describe("Array of trajectory data points"),
+  caliber: z.string().default("9mm").describe("Caliber being displayed (e.g., '.308 Winchester')"),
+  bulletWeight: z.number().default(115).describe("Bullet weight in grains"),
+  muzzleVelocity: z.number().default(1200).describe("Muzzle velocity in fps"),
+  trajectoryData: z.array(trajectoryPointSchema).default([]).describe("Array of trajectory data points"),
   zeroDistance: z.number().optional().default(100).describe("Zero distance in yards"),
   showVelocity: z.boolean().optional().default(true).describe("Show velocity line"),
   showEnergy: z.boolean().optional().default(true).describe("Show energy line"),
@@ -55,9 +55,9 @@ export const ballisticsChartPropsSchema = z.object({
 
 // State schema for interactable tracking
 export const ballisticsChartStateSchema = z.object({
-  selectedDistance: z.number().nullable().describe("The distance in yards the user is currently examining"),
-  focusedMetric: z.enum(["drop", "velocity", "energy", "windDrift"]).nullable().describe("Which metric the user is most interested in"),
-  isTableExpanded: z.boolean().describe("Whether the data table is expanded for detailed viewing"),
+  selectedDistance: z.number().nullable().default(null).describe("The distance in yards the user is currently examining"),
+  focusedMetric: z.enum(["drop", "velocity", "energy", "windDrift"]).nullable().default(null).describe("Which metric the user is most interested in"),
+  isTableExpanded: z.boolean().default(false).describe("Whether the data table is expanded for detailed viewing"),
 });
 
 // Keep alias for backward compatibility
@@ -113,11 +113,12 @@ function BallisticsChartBase({
     false
   );
 
-  // Calculate key stats
-  const maxDistance = Math.max(...trajectoryData.map((d) => d.distance));
-  const maxDrop = Math.max(...trajectoryData.map((d) => Math.abs(d.drop)));
-  const finalVelocity = trajectoryData[trajectoryData.length - 1]?.velocity || 0;
-  const finalEnergy = trajectoryData[trajectoryData.length - 1]?.energy || 0;
+  // Calculate key stats (guard against empty/undefined arrays during streaming)
+  const safeTrajectoryData = trajectoryData ?? [];
+  const maxDistance = safeTrajectoryData.length > 0 ? Math.max(...safeTrajectoryData.map((d) => d.distance)) : 0;
+  const maxDrop = safeTrajectoryData.length > 0 ? Math.max(...safeTrajectoryData.map((d) => Math.abs(d.drop))) : 0;
+  const finalVelocity = safeTrajectoryData[safeTrajectoryData.length - 1]?.velocity ?? 0;
+  const finalEnergy = safeTrajectoryData[safeTrajectoryData.length - 1]?.energy ?? 0;
 
   return (
     <motion.div
@@ -159,7 +160,7 @@ function BallisticsChartBase({
         <h4 className="text-sm text-slate-400 uppercase tracking-wider mb-3">Bullet Drop</h4>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart data={trajectoryData}>
+            <ComposedChart data={safeTrajectoryData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
               <XAxis
                 dataKey="distance"
@@ -224,7 +225,7 @@ function BallisticsChartBase({
           </h4>
           <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={trajectoryData}>
+              <LineChart data={safeTrajectoryData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                 <XAxis
                   dataKey="distance"
@@ -287,13 +288,13 @@ function BallisticsChartBase({
                 <th className="px-3 py-2 text-right text-slate-400 font-medium">Drop</th>
                 <th className="px-3 py-2 text-right text-slate-400 font-medium">Velocity</th>
                 <th className="px-3 py-2 text-right text-slate-400 font-medium">Energy</th>
-                {trajectoryData[0]?.windDrift !== undefined && (
+                {safeTrajectoryData[0]?.windDrift !== undefined && (
                   <th className="px-3 py-2 text-right text-slate-400 font-medium">Wind</th>
                 )}
               </tr>
             </thead>
             <tbody>
-              {trajectoryData.filter((_, i) => i % 2 === 0 || i === trajectoryData.length - 1).map((point, idx) => (
+              {safeTrajectoryData.filter((_, i) => i % 2 === 0 || i === safeTrajectoryData.length - 1).map((point, idx) => (
                 <tr
                   key={idx}
                   className="border-b border-slate-700/50 hover:bg-slate-800/50"

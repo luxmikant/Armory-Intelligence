@@ -106,16 +106,17 @@ class GraphErrorBoundary extends React.Component<
  * Zod schema for GraphData
  */
 export const graphDataSchema = z.object({
-  type: z.enum(["bar", "line", "pie"]).describe("Type of graph to render"),
-  labels: z.array(z.string()).describe("Labels for the graph"),
+  type: z.enum(["bar", "line", "pie"]).default("bar").describe("Type of graph to render"),
+  labels: z.array(z.string()).default([]).describe("Labels for the graph"),
   datasets: z
     .array(
       z.object({
-        label: z.string().describe("Label for the dataset"),
-        data: z.array(z.number()).describe("Data points for the dataset"),
+        label: z.string().default("").describe("Label for the dataset"),
+        data: z.array(z.number()).default([]).describe("Data points for the dataset"),
         color: z.string().optional().describe("Optional color for the dataset"),
       }),
     )
+    .default([])
     .describe("Data for the graph"),
 });
 
@@ -126,7 +127,7 @@ export const graphSchema = z.object({
   data: graphDataSchema.describe(
     "Data object containing chart configuration and values",
   ),
-  title: z.string().describe("Title for the chart"),
+  title: z.string().default("Chart").describe("Title for the chart"),
   showLegend: z
     .boolean()
     .optional()

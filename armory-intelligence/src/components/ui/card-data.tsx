@@ -22,13 +22,13 @@ export type DataCardState = {
 
 // Define the component props schema with Zod
 export const dataCardSchema = z.object({
-  title: z.string().describe("Title displayed above the data cards"),
+  title: z.string().default("Data").describe("Title displayed above the data cards"),
   options: z
     .array(
       z.object({
-        id: z.string().describe("Unique identifier for this card"),
-        label: z.string().describe("Display text for the card title"),
-        value: z.string().describe("Value associated with this card"),
+        id: z.string().default("").describe("Unique identifier for this card"),
+        label: z.string().default("").describe("Display text for the card title"),
+        value: z.string().default("").describe("Value associated with this card"),
         description: z
           .string()
           .optional()
@@ -39,6 +39,7 @@ export const dataCardSchema = z.object({
           .describe("Optional URL for the card to navigate to"),
       }),
     )
+    .default([])
     .describe("Array of selectable cards to display"),
 });
 

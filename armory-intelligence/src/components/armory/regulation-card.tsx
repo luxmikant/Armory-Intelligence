@@ -9,18 +9,18 @@ import { motion } from "framer-motion";
 import { z } from "zod";
 
 export const regulationCardSchema = z.object({
-  state: z.string().describe("State name or two-letter code"),
-  stateCode: z.string().describe("Two-letter state code"),
-  permitRequired: z.boolean().describe("Whether a permit is required for purchase"),
+  state: z.string().default("Unknown").describe("State name or two-letter code"),
+  stateCode: z.string().default("XX").describe("Two-letter state code"),
+  permitRequired: z.boolean().default(false).describe("Whether a permit is required for purchase"),
   permitType: z.string().optional().describe("Type of permit if required"),
-  openCarry: z.enum(["allowed", "restricted", "prohibited"]).describe("Open carry status"),
-  concealedCarry: z.enum(["shall-issue", "may-issue", "no-issue", "unrestricted"]).describe("Concealed carry policy"),
+  openCarry: z.enum(["allowed", "restricted", "prohibited"]).default("restricted").describe("Open carry status"),
+  concealedCarry: z.enum(["shall-issue", "may-issue", "no-issue", "unrestricted"]).default("may-issue").describe("Concealed carry policy"),
   waitingPeriod: z.number().optional().describe("Waiting period in days, if any"),
-  backgroundCheck: z.boolean().describe("Whether background check is required"),
-  registrationRequired: z.boolean().describe("Whether firearm registration is required"),
-  assaultWeaponBan: z.boolean().describe("Whether assault weapons are banned"),
+  backgroundCheck: z.boolean().default(true).describe("Whether background check is required"),
+  registrationRequired: z.boolean().default(false).describe("Whether firearm registration is required"),
+  assaultWeaponBan: z.boolean().default(false).describe("Whether assault weapons are banned"),
   magazineCapacityLimit: z.number().optional().describe("Maximum magazine capacity, if limited"),
-  redFlagLaw: z.boolean().describe("Whether red flag laws are in effect"),
+  redFlagLaw: z.boolean().default(false).describe("Whether red flag laws are in effect"),
   reciprocalStates: z.array(z.string()).optional().describe("States with CCW reciprocity"),
   lastUpdated: z.string().optional().describe("Date regulations were last updated"),
   disclaimer: z.string().optional().describe("Legal disclaimer text"),
@@ -181,7 +181,7 @@ export function RegulationCard({
         </div>
 
         {/* CCW Reciprocity */}
-        {reciprocalStates.length > 0 && (
+        {reciprocalStates?.length > 0 && (
           <div>
             <h4 className="text-sm font-semibold text-white mb-3">CCW Reciprocity</h4>
             <div className="flex flex-wrap gap-2">

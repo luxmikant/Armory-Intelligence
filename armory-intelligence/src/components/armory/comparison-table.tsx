@@ -19,21 +19,21 @@ import { withInteractable, useTamboComponentState } from "@tambo-ai/react";
 
 // Single firearm schema for comparison
 const firearmCompareSchema = z.object({
-  id: z.string().describe("Unique identifier"),
-  name: z.string().describe("Firearm name/model"),
-  manufacturer: z.string().describe("Manufacturer name"),
-  type: z.string().describe("Type of firearm"),
-  caliber: z.string().describe("Caliber"),
-  capacity: z.number().describe("Magazine capacity"),
-  weight: z.number().describe("Weight in lbs"),
-  barrelLength: z.number().describe("Barrel length in inches"),
+  id: z.string().default("").describe("Unique identifier"),
+  name: z.string().default("Unknown").describe("Firearm name/model"),
+  manufacturer: z.string().default("Unknown").describe("Manufacturer name"),
+  type: z.string().default("handgun").describe("Type of firearm"),
+  caliber: z.string().default("9mm").describe("Caliber"),
+  capacity: z.number().default(0).describe("Magazine capacity"),
+  weight: z.number().default(0).describe("Weight in lbs"),
+  barrelLength: z.number().default(0).describe("Barrel length in inches"),
   price: z.number().optional().describe("Price in USD"),
   imageUrl: z.string().optional().describe("Image URL"),
 });
 
 // Schema for Tambo AI component registration (props schema)
 export const comparisonTablePropsSchema = z.object({
-  firearms: z.array(firearmCompareSchema).min(2).max(4).describe("Array of 2-4 firearms to compare"),
+  firearms: z.array(firearmCompareSchema).max(4).default([]).describe("Array of 2-4 firearms to compare"),
   highlightDifferences: z.boolean().optional().default(true).describe("Whether to highlight spec differences"),
   showRecommendation: z.boolean().optional().default(false).describe("Whether to show AI recommendation"),
   recommendation: z.string().optional().describe("AI recommendation text if showRecommendation is true"),
@@ -41,9 +41,9 @@ export const comparisonTablePropsSchema = z.object({
 
 // State schema for interactable tracking
 export const comparisonTableStateSchema = z.object({
-  selectedFirearmId: z.string().nullable().describe("ID of the firearm user is focusing on"),
-  removedFirearmIds: z.array(z.string()).describe("IDs of firearms user has removed from comparison"),
-  preferredSpec: z.string().nullable().describe("The spec the user cares most about (e.g., 'price', 'capacity')"),
+  selectedFirearmId: z.string().nullable().default(null).describe("ID of the firearm user is focusing on"),
+  removedFirearmIds: z.array(z.string()).default([]).describe("IDs of firearms user has removed from comparison"),
+  preferredSpec: z.string().nullable().default(null).describe("The spec the user cares most about (e.g., 'price', 'capacity')"),
 });
 
 export type ComparisonTableProps = z.infer<typeof comparisonTablePropsSchema>;
@@ -59,7 +59,7 @@ const specRows = [
 ];
 
 export function ComparisonTableBase({
-  firearms,
+  firearms = [],
   highlightDifferences = true,
   showRecommendation = false,
   recommendation,
@@ -82,6 +82,15 @@ export function ComparisonTableBase({
     null,
     null
   );
+
+  // Guard: if firearms array is empty or insufficient
+  if (!firearms || firearms.length === 0) {
+    return (
+      <div className="rounded-2xl bg-white/[0.03] border border-white/[0.08] p-8 text-center">
+        <p className="text-slate-400 text-sm">No firearms data available for comparison.</p>
+      </div>
+    );
+  }
 
   // Filter out removed firearms (with fallback for undefined)
   const removedIds = removedFirearmIds ?? [];
@@ -165,7 +174,7 @@ export function ComparisonTableBase({
         </div>
         {visibleFirearms.map((firearm, idx) => (
           <motion.div
-            key={firearm.id}
+            key={firearm.id || `compare-${idx}`}
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.1 }}
@@ -235,14 +244,14 @@ export function ComparisonTableBase({
             </div>
 
             {/* Value cells */}
-            {visibleFirearms.map((firearm) => {
+            {visibleFirearms.map((firearm, fIdx) => {
               const value = firearm[spec.key as keyof typeof firearm];
               const isBest = bestValue !== undefined && value === bestValue;
               const isSelectedColumn = selectedFirearmId === firearm.id;
 
               return (
                 <div
-                  key={`${firearm.id}-${spec.key}`}
+                  key={`${firearm.id || `f-${fIdx}`}-${spec.key}`}
                   className={`p-3 text-center border-l border-slate-700/50 transition-colors ${
                     isBest && highlightDifferences ? "bg-green-500/10" : ""
                   } ${isSelectedColumn ? "bg-orange-500/5" : ""}`}

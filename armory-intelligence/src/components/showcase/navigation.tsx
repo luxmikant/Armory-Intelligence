@@ -26,6 +26,7 @@ export function Navigation() {
     { href: "/catalog", label: "Catalog" },
     { href: "/safety", label: "Safety" },
     { href: "/ballistics", label: "Ballistics" },
+    { href: "/regulations", label: "Regulations" },
     { href: "/chat", label: "AI Assistant" },
   ];
 

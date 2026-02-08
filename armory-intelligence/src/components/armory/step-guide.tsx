@@ -10,24 +10,24 @@ import { motion, AnimatePresence } from "framer-motion";
 import { z } from "zod";
 
 const stepSchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  description: z.string(),
-  imageUrl: z.string().optional(),
-  tips: z.array(z.string()).optional(),
-  warnings: z.array(z.string()).optional(),
-  tools: z.array(z.string()).optional(),
-  duration: z.string().optional(),
+  id: z.string().default("").describe("Unique step identifier"),
+  title: z.string().default("").describe("Step title"),
+  description: z.string().default("").describe("Detailed step instructions"),
+  imageUrl: z.string().optional().describe("Optional image URL for the step"),
+  tips: z.array(z.string()).optional().describe("Helpful tips for this step"),
+  warnings: z.array(z.string()).optional().describe("Safety warnings for this step"),
+  tools: z.array(z.string()).optional().describe("Tools needed for this step"),
+  duration: z.string().optional().describe("Estimated time for this step"),
 });
 
 export const stepGuideSchema = z.object({
-  title: z.string().describe("Guide title"),
-  description: z.string().describe("Brief description of the procedure"),
-  category: z.enum(["cleaning", "maintenance", "assembly", "disassembly", "safety", "storage"]).describe("Guide category"),
-  difficulty: z.enum(["beginner", "intermediate", "advanced"]).describe("Difficulty level"),
+  title: z.string().default("Guide").describe("Guide title"),
+  description: z.string().default("").describe("Brief description of the procedure"),
+  category: z.enum(["cleaning", "maintenance", "assembly", "disassembly", "safety", "storage"]).default("maintenance").describe("Guide category"),
+  difficulty: z.enum(["beginner", "intermediate", "advanced"]).default("beginner").describe("Difficulty level"),
   totalDuration: z.string().optional().describe("Estimated total time"),
   toolsRequired: z.array(z.string()).optional().describe("List of required tools"),
-  steps: z.array(stepSchema).describe("Array of steps"),
+  steps: z.array(stepSchema).default([]).describe("Array of steps"),
   safetyNotice: z.string().optional().describe("Safety notice shown at top"),
 });
 
@@ -170,7 +170,7 @@ export function StepGuide({
 
   const handleMarkComplete = () => {
     setCompletedSteps((prev) => new Set([...prev, activeStep]));
-    if (activeStep < steps.length - 1) {
+    if (activeStep < safeSteps.length - 1) {
       setActiveStep(activeStep + 1);
     }
   };
@@ -182,12 +182,13 @@ export function StepGuide({
   };
 
   const handleNext = () => {
-    if (activeStep < steps.length - 1) {
+    if (activeStep < safeSteps.length - 1) {
       setActiveStep(activeStep + 1);
     }
   };
 
-  const progress = (completedSteps.size / steps.length) * 100;
+  const safeSteps = steps ?? [];
+  const progress = safeSteps.length > 0 ? (completedSteps.size / safeSteps.length) * 100 : 0;
 
   return (
     <motion.div
@@ -220,7 +221,7 @@ export function StepGuide({
         <div className="mb-4">
           <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
             <span>Progress</span>
-            <span>{completedSteps.size} / {steps.length} steps</span>
+            <span>{completedSteps.size} / {safeSteps.length} steps</span>
           </div>
           <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
             <motion.div
@@ -258,9 +259,9 @@ export function StepGuide({
 
       {/* Steps */}
       <div className="p-6 space-y-3">
-        {steps.map((step, index) => (
+        {safeSteps.map((step, index) => (
           <StepCard
-            key={step.id}
+            key={step.id || `step-${index}`}
             step={step}
             stepNumber={index + 1}
             isActive={activeStep === index}
@@ -287,7 +288,7 @@ export function StepGuide({
         </button>
         <button
           onClick={handleNext}
-          disabled={activeStep === steps.length - 1}
+          disabled={activeStep === safeSteps.length - 1}
           className="flex-1 px-4 py-2 bg-slate-800 text-slate-300 font-medium rounded hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           Next →

@@ -70,21 +70,27 @@ export const MessageThreadFull = React.forwardRef<
   const defaultSuggestions: Suggestion[] = [
     {
       id: "suggestion-1",
-      title: "Get started",
-      detailedSuggestion: "What can you help me with?",
-      messageId: "welcome-query",
+      title: "Compare firearms",
+      detailedSuggestion: "Compare the Glock 19 and Sig P320 for concealed carry",
+      messageId: "compare-query",
     },
     {
       id: "suggestion-2",
-      title: "Learn more",
-      detailedSuggestion: "Tell me about your capabilities.",
-      messageId: "capabilities-query",
+      title: "Safety checklist",
+      detailedSuggestion: "Show me the essential firearm storage safety checklist",
+      messageId: "safety-query",
     },
     {
       id: "suggestion-3",
-      title: "Examples",
-      detailedSuggestion: "Show me some example queries I can try.",
-      messageId: "examples-query",
+      title: "State regulations",
+      detailedSuggestion: "What are the concealed carry laws in Texas?",
+      messageId: "regulations-query",
+    },
+    {
+      id: "suggestion-4",
+      title: "Ballistics data",
+      detailedSuggestion: "Calculate ballistics for a 9mm at 100 yards",
+      messageId: "ballistics-query",
     },
   ];
 

@@ -19,14 +19,14 @@ import { withInteractable, useTamboComponentState } from "@tambo-ai/react";
 
 // Schema for Tambo AI component registration
 export const firearmCardSchema = z.object({
-  name: z.string().describe("The name/model of the firearm"),
-  manufacturer: z.string().describe("The manufacturer/brand name"),
-  type: z.enum(["handgun", "rifle", "shotgun"]).describe("The type of firearm"),
-  action: z.string().describe("The action type (semi-auto, bolt, pump, lever, revolver)"),
-  caliber: z.string().describe("The caliber/gauge of the firearm"),
-  capacity: z.number().describe("Magazine/chamber capacity"),
-  weight: z.number().describe("Weight in pounds"),
-  barrelLength: z.number().describe("Barrel length in inches"),
+  name: z.string().default("Unknown Firearm").describe("The name/model of the firearm"),
+  manufacturer: z.string().default("Unknown").describe("The manufacturer/brand name"),
+  type: z.enum(["handgun", "rifle", "shotgun"]).default("handgun").describe("The type of firearm"),
+  action: z.string().default("semi-auto").describe("The action type (semi-auto, bolt, pump, lever, revolver)"),
+  caliber: z.string().default("9mm").describe("The caliber/gauge of the firearm"),
+  capacity: z.number().default(0).describe("Magazine/chamber capacity"),
+  weight: z.number().default(0).describe("Weight in pounds"),
+  barrelLength: z.number().default(0).describe("Barrel length in inches"),
   price: z.number().optional().describe("MSRP price in USD"),
   imageUrl: z.string().optional().describe("URL to firearm image"),
   description: z.string().optional().describe("Brief description of the firearm"),
@@ -91,7 +91,7 @@ function FirearmCardBase({
     false
   );
 
-  const actionColorClass = actionColors[action.toLowerCase()] || "bg-slate-500/20 text-slate-400 border-slate-500/30";
+  const actionColorClass = actionColors[action?.toLowerCase()] ?? "bg-slate-500/20 text-slate-400 border-slate-500/30";
 
   // Handler for selecting the firearm
   const handleSelect = () => {

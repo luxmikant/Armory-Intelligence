@@ -23,11 +23,14 @@ export default function Home() {
         tamboUrl={process.env.NEXT_PUBLIC_TAMBO_URL}
         mcpServers={mcpServers}
       >
-        <div className="h-screen flex flex-col bg-slate-950">
-          {/* Slim header */}
-          <header className="flex items-center justify-between px-6 py-3 border-b border-white/[0.06] bg-slate-950/90 backdrop-blur-xl flex-shrink-0">
+        <div className="h-screen flex flex-col bg-[#0a0a12]">
+          {/* Slim header with gradient accent */}
+          <header className="relative flex items-center justify-between px-6 py-3 border-b border-white/[0.06] bg-[#0a0a12]/90 backdrop-blur-xl flex-shrink-0">
+            {/* Top gradient line */}
+            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-orange-500/40 to-transparent" />
+            
             <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-lg shadow-orange-500/20">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-amber-400 flex items-center justify-center shadow-lg shadow-orange-500/20">
                 <span className="text-xs font-black text-slate-950">AI</span>
               </div>
               <span className="font-bold text-white text-sm group-hover:text-orange-300 transition-colors">

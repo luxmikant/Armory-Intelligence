@@ -19,27 +19,27 @@ import { withInteractable, useTamboComponentState } from "@tambo-ai/react";
 
 // Checklist item schema
 const checklistItemSchema = z.object({
-  id: z.string().describe("Unique item identifier"),
-  text: z.string().describe("The checklist item text"),
+  id: z.string().default("").describe("Unique item identifier"),
+  text: z.string().default("").describe("The checklist item text"),
   priority: z.enum(["critical", "high", "medium", "low"]).optional().describe("Priority level"),
   note: z.string().optional().describe("Additional note or tip"),
 });
 
 // Schema for Tambo AI component registration (props)
 export const interactiveChecklistPropsSchema = z.object({
-  title: z.string().describe("Title of the checklist"),
+  title: z.string().default("Checklist").describe("Title of the checklist"),
   description: z.string().optional().describe("Description or context"),
-  category: z.enum(["safety", "storage", "cleaning", "transport", "range", "purchase"]).describe("Checklist category"),
-  items: z.array(checklistItemSchema).describe("Array of checklist items"),
+  category: z.enum(["safety", "storage", "cleaning", "transport", "range", "purchase"]).default("safety").describe("Checklist category"),
+  items: z.array(checklistItemSchema).default([]).describe("Array of checklist items"),
   allowSkip: z.boolean().optional().default(false).describe("Whether items can be skipped"),
   showProgress: z.boolean().optional().default(true).describe("Whether to show progress bar"),
 });
 
 // State schema for interactable tracking
 export const interactiveChecklistStateSchema = z.object({
-  checkedItemIds: z.array(z.string()).describe("IDs of items that have been checked off"),
-  expandedItemId: z.string().nullable().describe("ID of the item currently expanded to show its note"),
-  completedAt: z.string().nullable().describe("ISO timestamp when checklist was fully completed"),
+  checkedItemIds: z.array(z.string()).default([]).describe("IDs of items that have been checked off"),
+  expandedItemId: z.string().nullable().default(null).describe("ID of the item currently expanded to show its note"),
+  completedAt: z.string().nullable().default(null).describe("ISO timestamp when checklist was fully completed"),
 });
 
 // Keep alias for backward compatibility
@@ -96,9 +96,10 @@ function InteractiveChecklistBase({
   const checkedIds = checkedItemIds ?? [];
   const checkedItems = new Set(checkedIds);
   
-  const config = categoryConfig[category];
-  const progress = (checkedItems.size / items.length) * 100;
-  const isComplete = checkedItems.size === items.length;
+  const config = categoryConfig[category] ?? categoryConfig.safety;
+  const safeItems = items ?? [];
+  const progress = safeItems.length > 0 ? (checkedItems.size / safeItems.length) * 100 : 0;
+  const isComplete = safeItems.length > 0 && checkedItems.size === safeItems.length;
 
   const toggleItem = (id: string) => {
     const newCheckedIds = checkedIds.includes(id)
@@ -108,9 +109,9 @@ function InteractiveChecklistBase({
     setCheckedItemIds(newCheckedIds);
     
     // Track completion time for AI visibility
-    if (newCheckedIds.length === items.length && !completedAt) {
+    if (newCheckedIds.length === safeItems.length && !completedAt) {
       setCompletedAt(new Date().toISOString());
-    } else if (newCheckedIds.length < items.length && completedAt) {
+    } else if (newCheckedIds.length < safeItems.length && completedAt) {
       setCompletedAt(null);
     }
   };
@@ -141,7 +142,7 @@ function InteractiveChecklistBase({
         {showProgress && (
           <div className="mt-4">
             <div className="flex justify-between text-xs text-slate-400 mb-1">
-              <span>{checkedItems.size} of {items.length} completed</span>
+              <span>{checkedItems.size} of {safeItems.length} completed</span>
               <span>{Math.round(progress)}%</span>
             </div>
             <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
@@ -159,14 +160,14 @@ function InteractiveChecklistBase({
       {/* Checklist items */}
       <div className="p-2">
         <AnimatePresence>
-          {items.map((item, idx) => {
+          {safeItems.map((item, idx) => {
             const isChecked = checkedItems.has(item.id);
             const isExpanded = expandedItemId === item.id;
             const priority = item.priority ? priorityConfig[item.priority] : null;
 
             return (
               <motion.div
-                key={item.id}
+                key={item.id || `checklist-item-${idx}`}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: idx * 0.05 }}

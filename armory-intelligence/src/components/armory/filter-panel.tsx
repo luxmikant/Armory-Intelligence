@@ -24,22 +24,22 @@ type FilterState = {
 
 // Zod schema for filter panel props (for Tambo registration)
 export const filterPanelPropsSchema = z.object({
-  onApplyFilters: z.any().optional(),
-  onClearFilters: z.any().optional(),
-  availableTypes: z.array(z.string()).optional(),
-  availableCalibers: z.array(z.string()).optional(),
-  priceRange: z.object({ min: z.number(), max: z.number() }).optional(),
-  isOpen: z.boolean().optional(),
+  onApplyFilters: z.any().optional().describe("Callback when filters are applied"),
+  onClearFilters: z.any().optional().describe("Callback when filters are cleared"),
+  availableTypes: z.array(z.string()).optional().describe("Available firearm types to filter by (e.g., Handgun, Rifle, Shotgun)"),
+  availableCalibers: z.array(z.string()).optional().describe("Available calibers to filter by (e.g., 9mm, .45 ACP, .223)"),
+  priceRange: z.object({ min: z.number(), max: z.number() }).optional().describe("Min and max price range for filtering"),
+  isOpen: z.boolean().optional().describe("Whether the filter panel starts expanded"),
 });
 
 // State schema for interactable tracking
 export const filterPanelStateSchema = z.object({
-  selectedTypes: z.array(z.string()).describe("Firearm types user has selected (e.g., Handgun, Rifle)"),
-  selectedCalibers: z.array(z.string()).describe("Calibers user has selected (e.g., 9mm, .45 ACP)"),
-  priceMin: z.number().describe("Minimum price the user is looking for"),
-  priceMax: z.number().describe("Maximum price the user is willing to pay"),
-  sortBy: z.string().describe("How user wants results sorted (relevance, price-low, price-high, name, newest, popularity)"),
-  isExpanded: z.boolean().describe("Whether the filter panel is currently open"),
+  selectedTypes: z.array(z.string()).default([]).describe("Firearm types user has selected (e.g., Handgun, Rifle)"),
+  selectedCalibers: z.array(z.string()).default([]).describe("Calibers user has selected (e.g., 9mm, .45 ACP)"),
+  priceMin: z.number().default(0).describe("Minimum price the user is looking for"),
+  priceMax: z.number().default(5000).describe("Maximum price the user is willing to pay"),
+  sortBy: z.string().default("relevance").describe("How user wants results sorted (relevance, price-low, price-high, name, newest, popularity)"),
+  isExpanded: z.boolean().default(false).describe("Whether the filter panel is currently open"),
 });
 
 // Keep alias for backward compatibility

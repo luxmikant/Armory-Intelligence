@@ -18,9 +18,20 @@ const nextConfig: NextConfig = {
       "@valibot/to-json-schema": false,
     };
 
+    // Fix chevrotain's lodash-es import issues
+    // Use exact-match alias ($) so lodash-es/min.js etc. still resolve from node_modules
+    config.resolve.alias["lodash-es$"] = require.resolve("lodash-es");
+
     // Fix EISDIR readlink bug on Windows + Node.js 22
     // Disable symlink resolution since we don't use symlinks
     config.resolve.symlinks = false;
+
+    // Ensure .js extensions resolve correctly for ESM packages
+    config.resolve.extensionAlias = {
+      ...config.resolve.extensionAlias,
+      ".js": [".ts", ".tsx", ".js", ".jsx"],
+      ".mjs": [".mts", ".mjs"],
+    };
 
     // Disable persistent filesystem cache to avoid readlink EISDIR
     config.cache = false;
